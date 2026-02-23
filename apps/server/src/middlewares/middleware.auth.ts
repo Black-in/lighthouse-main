@@ -9,7 +9,27 @@ import jwt from 'jsonwebtoken';
 import { AuthUser } from '../types/express';
 import ResponseWriter from '../class/response_writer';
 
+function isTruthy(value?: string) {
+    if (!value) return false;
+    return ['1', 'true', 'yes', 'on'].includes(value.toLowerCase());
+}
+
+function shouldBypassAuthInDevMode() {
+    if (isTruthy(env.SERVER_DEV_ACCESS_MODE)) return true;
+    return env.SERVER_NODE_ENV !== 'production';
+}
+
 export default function authMiddleware(req: Request, res: Response, next: NextFunction) {
+    if (shouldBypassAuthInDevMode()) {
+        req.user = {
+            id: 'dev-local-user',
+            name: 'Local Developer',
+            email: 'dev@blackin.local',
+        };
+        next();
+        return;
+    }
+
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer')) {
         res.status(401).json({

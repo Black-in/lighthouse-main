@@ -81,6 +81,16 @@ export default class WebSocketServer {
                 this.send_message(ws, data);
                 return;
             }
+            case COMMAND.lighthouse_DEPLOY_DEVNET: {
+                const data = await CommandService.handle_incoming_command(ws, message);
+                this.send_message(ws, data);
+                return;
+            }
+            case COMMAND.lighthouse_DEPLOY_MAINNET: {
+                const data = await CommandService.handle_incoming_command(ws, message);
+                this.send_message(ws, data);
+                return;
+            }
             default:
                 return;
         }
@@ -103,18 +113,39 @@ export default class WebSocketServer {
         const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
         const token = url.searchParams.get('token');
         const contract_id = url.searchParams.get('contractId');
+        const isDevAccessMode =
+            env.SERVER_NODE_ENV !== 'production' ||
+            ['1', 'true', 'yes', 'on'].includes((env.SERVER_DEV_ACCESS_MODE || '').toLowerCase());
+
+        if (isDevAccessMode) {
+            if (!contract_id) {
+                return { authorised: false, decoded: null, contractId: null };
+            }
+            ws.user = {
+                id: 'dev-local-user',
+                name: 'Local Developer',
+                email: 'dev@blackin.local',
+            };
+            ws.contractId = contract_id;
+            return { authorised: true, decoded: ws.user, contractId: contract_id };
+        }
 
         if (!token || !contract_id) {
             console.error('No token provided');
             return { authorised: false, decoded: null, contractId: null };
         }
 
-        const decoded = jwt.verify(token, env.SOCKET_JWT_SECRET);
-        if (!decoded) {
+        let decoded: string | jwt.JwtPayload | null = null;
+        try {
+            decoded = jwt.verify(token, env.SOCKET_JWT_SECRET);
+        } catch {
+            return { authorised: false, decoded: null, contractId: null };
+        }
+        if (!decoded || typeof decoded === 'string') {
             return { authorised: false, decoded: null, contractId: null };
         }
 
-        ws.user = decoded as AuthUser;
+        ws.user = decoded as unknown as AuthUser;
         ws.contractId = contract_id;
         return { authorised: true, decoded: ws.user, contractId: contract_id };
     }

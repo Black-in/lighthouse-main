@@ -7,21 +7,33 @@ import { prisma } from '@lighthouse/database';
 import { CustomWebSocket } from '../types/socket_types';
 import { ParsedMessage } from '../ws/socket.server';
 import BuildCache from './services.build_cache';
-import { WSServerIncomingPayload, TerminalSocketData, BuildJobPayload } from '@lighthouse/types';
+import {
+    WSServerIncomingPayload,
+    TerminalSocketData,
+    BuildJobPayload,
+    IncomingPayload,
+} from '@lighthouse/types';
 import { socket_orchestrator_queue } from './services.init';
 
 export default class CommandService {
     static async handle_incoming_command<T>(
         ws: CustomWebSocket,
         message: ParsedMessage<T>,
-    ): Promise<WSServerIncomingPayload<string>> {
+    ): Promise<WSServerIncomingPayload<IncomingPayload>> {
+        const createPayload = (line: string): IncomingPayload => ({
+            userId: ws.user.id,
+            contractId: ws.contractId,
+            line,
+            timestamp: Date.now(),
+        });
+
         try {
             const contractId = ws.contractId;
             console.log('contract id is : ', contractId);
             if (!contractId || typeof contractId !== 'string') {
                 return {
                     type: TerminalSocketData.VALIDATION_ERROR,
-                    payload: 'Invalid or missing contract ID',
+                    payload: createPayload('Invalid or missing contract ID'),
                 };
             }
 
@@ -32,7 +44,7 @@ export default class CommandService {
             if (!contract) {
                 return {
                     type: TerminalSocketData.VALIDATION_ERROR,
-                    payload: `Contract with ID ${contractId} not found`,
+                    payload: createPayload(`Contract with ID ${contractId} not found`),
                 };
             }
 
@@ -41,7 +53,7 @@ export default class CommandService {
             if (is_cached) {
                 return {
                     type: TerminalSocketData.INFO,
-                    payload: 'Build retrieved from cache',
+                    payload: createPayload('Build retrieved from cache'),
                 };
             }
 
@@ -58,7 +70,7 @@ export default class CommandService {
             if (!job_id) {
                 return {
                     type: TerminalSocketData.SERVER_MESSAGE,
-                    payload: `Internal server error while running your command`,
+                    payload: createPayload('Internal server error while running your command'),
                 };
             }
 
@@ -74,13 +86,13 @@ export default class CommandService {
 
             return {
                 type: TerminalSocketData.INFO,
-                payload: 'Starting new build',
+                payload: createPayload('Command queued. Starting job...'),
             };
         } catch (err) {
             console.error('error while running command', err);
             return {
                 type: TerminalSocketData.SERVER_MESSAGE,
-                payload: `Internal server error while running your command`,
+                payload: createPayload('Internal server error while running your command'),
             };
         }
     }

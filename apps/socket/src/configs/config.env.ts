@@ -12,6 +12,11 @@ dotenv.config({
 });
 
 const envSchema = z.object({
+    SERVER_NODE_ENV: z.enum(['development', 'production']).default('development'),
+    SERVER_DEV_ACCESS_MODE: z
+        .string()
+        .optional()
+        .transform((val) => (val ?? '').trim()),
     SOCKET_JWT_SECRET: z.string(),
     SOCKET_REDIS_URL: z.url(),
     SOCKET_PORT: z.string().transform((val) => Number(val)),

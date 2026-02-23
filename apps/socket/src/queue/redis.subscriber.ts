@@ -5,12 +5,13 @@
 
 import Redis from 'ioredis';
 import { wsserver } from '../services/services.init';
+import { env } from '../configs/config.env';
 
 export default class RedisPubSub {
     private subscriber: Redis;
 
     constructor() {
-        this.subscriber = new Redis('');
+        this.subscriber = new Redis(env.SOCKET_REDIS_URL);
         this.pubsub_processor();
     }
 

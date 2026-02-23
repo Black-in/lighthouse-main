@@ -13,6 +13,10 @@ dotenv.config({
 
 const envScehma = z.object({
     SERVER_NODE_ENV: z.enum(['development', 'production']),
+    SERVER_DEV_ACCESS_MODE: z
+        .string()
+        .optional()
+        .transform((val) => (val ?? '').trim()),
     DATABASE_URL: z.url(),
     SERVER_PORT: z
         .string()
