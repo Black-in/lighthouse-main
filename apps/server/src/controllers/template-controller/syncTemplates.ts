@@ -7,6 +7,7 @@ import { Request, Response } from 'express';
 import { prisma } from '@lighthouse/database';
 import ResponseWriter from '../../class/response_writer';
 import env from '../../configs/config.env';
+import { Chain } from '@lighthouse/types';
 
 export default async function syncTemplate(req: Request, res: Response) {
     const auth = req.headers.authorization;
@@ -32,10 +33,18 @@ export default async function syncTemplate(req: Request, res: Response) {
         title: body.title,
         description: body.description || '',
         category: body.category,
+        chain:
+            body.chain === Chain.SOLANA ||
+            (typeof body.chain !== 'string' && (body.solanaVersion || body.anchorVersion))
+                ? Chain.SOLANA
+                : Chain.BASE,
         tags: Array.isArray(body.tags) ? body.tags : [],
         s3_prefix: body.s3_prefix,
         solanaVersion: body.solanaVersion,
         anchorVersion: body.anchorVersion,
+        baseNetwork: body.baseNetwork || null,
+        frontendStack: body.frontendStack || null,
+        runtimeStack: body.runtimeStack || null,
         imageUrl: body.imageUrl,
         summarisedObject:
             typeof body.summarisedObject === 'string'

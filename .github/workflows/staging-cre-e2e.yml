@@ -1,0 +1,81 @@
+name: staging-cre-e2e
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - 'release/**'
+      - 'rc/**'
+
+jobs:
+  cre-e2e-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      SMOKE_ARTIFACT_PATH: /tmp/cre-smoke-artifact.json
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.0.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify staging release matches this commit
+        run: |
+          MAX_ATTEMPTS=40
+          SLEEP_SECONDS=30
+          ATTEMPT=1
+
+          while [ "$ATTEMPT" -le "$MAX_ATTEMPTS" ]; do
+            RESPONSE=$(curl -fsS \
+              -H "Authorization: Bearer ${STAGING_SMOKE_AUTH_TOKEN}" \
+              -H "x-admin-secret: ${STAGING_ADMIN_SECRET}" \
+              "${STAGING_API_BASE_URL}/api/v1/health/cre" || true)
+            RELEASE_SHA=$(echo "$RESPONSE" | jq -r '.data.releaseSha // empty' 2>/dev/null || true)
+
+            if [ "$RELEASE_SHA" = "$GITHUB_SHA" ]; then
+              echo "Staging release SHA matches commit: $RELEASE_SHA"
+              exit 0
+            fi
+
+            echo "Attempt ${ATTEMPT}/${MAX_ATTEMPTS}: staging SHA not ready yet (got: ${RELEASE_SHA:-empty})"
+            ATTEMPT=$((ATTEMPT + 1))
+            sleep "$SLEEP_SECONDS"
+          done
+
+          echo "Staging release SHA mismatch after waiting."
+          echo "Expected: $GITHUB_SHA"
+          echo "Actual:   ${RELEASE_SHA:-empty}"
+          exit 1
+        env:
+          STAGING_API_BASE_URL: ${{ secrets.STAGING_API_BASE_URL }}
+          STAGING_SMOKE_AUTH_TOKEN: ${{ secrets.STAGING_SMOKE_AUTH_TOKEN }}
+          STAGING_ADMIN_SECRET: ${{ secrets.STAGING_ADMIN_SECRET }}
+
+      - name: Run CRE E2E smoke on staging
+        run: pnpm --filter server run smoke:cre-e2e
+        env:
+          SMOKE_API_BASE_URL: ${{ secrets.STAGING_API_BASE_URL }}
+          SMOKE_AUTH_TOKEN: ${{ secrets.STAGING_SMOKE_AUTH_TOKEN }}
+          SMOKE_PROMPT: ${{ secrets.STAGING_SMOKE_PROMPT }}
+          SMOKE_ARTIFACT_PATH: ${{ env.SMOKE_ARTIFACT_PATH }}
+
+      - name: Upload CRE smoke artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-cre-e2e-${{ github.run_id }}
+          path: ${{ env.SMOKE_ARTIFACT_PATH }}
+          if-no-files-found: warn

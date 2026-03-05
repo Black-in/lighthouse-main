@@ -4,6 +4,24 @@
  */
 
 import rateLimit from 'express-rate-limit';
+import env from '../configs/config.env';
+
+function isTruthy(value?: string) {
+    if (!value) return false;
+    return ['1', 'true', 'yes', 'on'].includes(value.toLowerCase());
+}
+
+function isLocalhostRequestHost(host?: string) {
+    if (!host) return false;
+    const hostname = host.split(':')[0]?.toLowerCase();
+    return ['localhost', '127.0.0.1', '0.0.0.0', '::1'].includes(hostname);
+}
+
+function shouldBypassLimitsInDevMode(host?: string) {
+    if (isTruthy(env.SERVER_DEV_ACCESS_MODE)) return true;
+    if (env.SERVER_NODE_ENV !== 'production') return true;
+    return isLocalhostRequestHost(host);
+}
 
 export default class RateLimit {
     private static readonly SECOND = 1000;
@@ -16,6 +34,7 @@ export default class RateLimit {
         message: 'Too many contract generation requests, please try again later.',
         standardHeaders: true,
         legacyHeaders: false,
+        skip: (req) => shouldBypassLimitsInDevMode(req.headers.host),
     });
 
     static delete_contract_rate_limit = rateLimit({

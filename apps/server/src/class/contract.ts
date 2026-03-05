@@ -3,15 +3,14 @@
  * © 2026 ayushshrivastv
  */
 
-import axios from 'axios';
-import env from '../configs/config.env';
 import ResponseWriter from '../class/response_writer';
 import { Response } from 'express';
 import { ChatRole, prisma } from '@lighthouse/database';
 import { generator, objectStore } from '../services/init';
-import { MODEL, STAGE } from '@lighthouse/types';
+import { Chain, MODEL, STAGE } from '@lighthouse/types';
 import { Contract as ContractType } from '@lighthouse/database';
 import chalk from 'chalk';
+import { resolvePrismaHttpError } from '../utils/prisma_error';
 
 export default class Contract {
     static async generate_with_template(
@@ -21,15 +20,11 @@ export default class Contract {
         template_id: string,
         instruction?: string,
         model?: MODEL,
+        chain: Chain = Chain.BASE,
     ) {
         try {
             // fetch the template data
-            const template_data = await axios.get(
-                `${env.SERVER_CLOUDFRONT_DOMAIN_TEMPLATES}/${template_id}/resource`,
-                {
-                    responseType: 'json',
-                },
-            );
+            const template_files = await objectStore.get_template_files(template_id);
 
             // get template from the db too
             const template = await prisma.template.findUnique({
@@ -41,12 +36,21 @@ export default class Contract {
 
             // checks if template_data doesn't exist
             if (
-                !template_data ||
-                !Array.isArray(template_data.data) ||
+                !template_files ||
+                !Array.isArray(template_files) ||
                 !template ||
                 !template.summarisedObject
             ) {
                 ResponseWriter.not_found(res, 'Template not found');
+                return;
+            }
+
+            if (template.chain !== chain) {
+                ResponseWriter.validation_error(
+                    res,
+                    `Template belongs to ${template.chain} and cannot be used with ${chain}`,
+                    'Template chain mismatch',
+                );
                 return;
             }
 
@@ -58,6 +62,7 @@ export default class Contract {
                         userId: user_id,
                         title: 'contractor',
                         contractType: 'CUSTOM',
+                        chain,
                         summarisedObject: template.summarisedObject,
                     },
                 });
@@ -66,7 +71,7 @@ export default class Contract {
             // upload the template files to user's contract
             await objectStore.uploadContractFiles(
                 contract_id,
-                template_data.data,
+                template_files,
                 'no raw llm response for contracts generated from templates',
             );
 
@@ -82,7 +87,7 @@ export default class Contract {
                     },
                 });
                 generator.create_stream(res);
-                generator.send_sse(res, STAGE.END, { stage: 'End', data: template_data.data });
+                generator.send_sse(res, STAGE.END, { stage: 'End', data: template_files });
                 ResponseWriter.stream.end(res);
                 return;
             } else {
@@ -115,20 +120,36 @@ export default class Contract {
                     instruction,
                     model || MODEL.GEMINI,
                     contract_id,
+                    chain,
                     JSON.parse(template.summarisedObject),
                 );
             }
         } catch (error) {
             console.error('Error in generate_contract_controller: ', error);
+            const prismaError = resolvePrismaHttpError(error);
             if (!res.headersSent) {
-                ResponseWriter.server_error(res);
+                if (prismaError) {
+                    ResponseWriter.error(
+                        res,
+                        prismaError.message,
+                        prismaError.statusCode,
+                        'PRISMA_ERROR',
+                        prismaError.details,
+                    );
+                    return;
+                }
+                ResponseWriter.server_error(
+                    res,
+                    'Internal server error',
+                    error instanceof Error ? error.message : undefined,
+                );
                 return;
             } else {
                 ResponseWriter.stream.write(
                     res,
                     `data: ${JSON.stringify({
                         type: 'error',
-                        error: 'Internal server error',
+                        error: prismaError?.message || 'Internal server error',
                     })}\n\n`,
                 );
                 ResponseWriter.stream.end(res);
@@ -142,6 +163,7 @@ export default class Contract {
         user_id: string,
         instruction: string,
         model?: MODEL,
+        chain: Chain = Chain.BASE,
     ) {
         try {
             // create the contract and user message to generate the contract
@@ -152,6 +174,7 @@ export default class Contract {
                         userId: user_id,
                         title: 'contractor',
                         contractType: 'CUSTOM',
+                        chain,
                     },
                 });
 
@@ -165,18 +188,33 @@ export default class Contract {
             });
 
             // generate the new contract
-            generator.generate(res, 'new', instruction, model || MODEL.GEMINI, contract_id);
+            generator.generate(res, 'new', instruction, model || MODEL.GEMINI, contract_id, chain);
         } catch (error) {
             console.error('Error in generate_contract_controller: ', error);
+            const prismaError = resolvePrismaHttpError(error);
             if (!res.headersSent) {
-                ResponseWriter.server_error(res);
+                if (prismaError) {
+                    ResponseWriter.error(
+                        res,
+                        prismaError.message,
+                        prismaError.statusCode,
+                        'PRISMA_ERROR',
+                        prismaError.details,
+                    );
+                    return;
+                }
+                ResponseWriter.server_error(
+                    res,
+                    'Internal server error',
+                    error instanceof Error ? error.message : undefined,
+                );
                 return;
             } else {
                 ResponseWriter.stream.write(
                     res,
                     `data: ${JSON.stringify({
                         type: 'error',
-                        error: 'Internal server error',
+                        error: prismaError?.message || 'Internal server error',
                     })}\n\n`,
                 );
                 ResponseWriter.stream.end(res);
@@ -189,6 +227,7 @@ export default class Contract {
         contract: ContractType,
         instruction: string,
         model?: MODEL,
+        chain: Chain = Chain.BASE,
     ) {
         try {
             // create user message
@@ -207,19 +246,35 @@ export default class Contract {
                 instruction,
                 model || MODEL.GEMINI,
                 contract.id,
+                chain,
                 JSON.parse(contract.summarisedObject || ''),
             );
         } catch (error) {
             console.error('Error in generate_contract_controller: ', error);
+            const prismaError = resolvePrismaHttpError(error);
             if (!res.headersSent) {
-                ResponseWriter.server_error(res);
+                if (prismaError) {
+                    ResponseWriter.error(
+                        res,
+                        prismaError.message,
+                        prismaError.statusCode,
+                        'PRISMA_ERROR',
+                        prismaError.details,
+                    );
+                    return;
+                }
+                ResponseWriter.server_error(
+                    res,
+                    'Internal server error',
+                    error instanceof Error ? error.message : undefined,
+                );
                 return;
             } else {
                 ResponseWriter.stream.write(
                     res,
                     `data: ${JSON.stringify({
                         type: 'error',
-                        error: 'Internal server error',
+                        error: prismaError?.message || 'Internal server error',
                     })}\n\n`,
                 );
                 ResponseWriter.stream.end(res);

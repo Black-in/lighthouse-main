@@ -7,6 +7,24 @@ import { NextFunction, Request, Response } from 'express';
 import ResponseWriter from '../class/response_writer';
 import { ChatRole, prisma } from '@lighthouse/database';
 import { DAILY_LIMIT } from '@lighthouse/types';
+import env from '../configs/config.env';
+
+function isTruthy(value?: string) {
+    if (!value) return false;
+    return ['1', 'true', 'yes', 'on'].includes(value.toLowerCase());
+}
+
+function isLocalhostRequestHost(host?: string) {
+    if (!host) return false;
+    const hostname = host.split(':')[0]?.toLowerCase();
+    return ['localhost', '127.0.0.1', '0.0.0.0', '::1'].includes(hostname);
+}
+
+function shouldBypassLimitsInDevMode(req: Request) {
+    if (isTruthy(env.SERVER_DEV_ACCESS_MODE)) return true;
+    if (env.SERVER_NODE_ENV !== 'production') return true;
+    return isLocalhostRequestHost(req.headers.host);
+}
 
 export default class DailyRateLimit {
     private static readonly WINDOW_MS: number = 24 * 60 * 60 * 1000;
@@ -28,6 +46,10 @@ export default class DailyRateLimit {
 
     static async generate_contract_daily_limit(req: Request, res: Response, next: NextFunction) {
         try {
+            if (shouldBypassLimitsInDevMode(req)) {
+                next();
+                return;
+            }
             const user = req.user;
             if (!user || !user.id) {
                 ResponseWriter.unauthorized(res);
@@ -88,6 +110,10 @@ export default class DailyRateLimit {
 
     static async contract_messages_limit(req: Request, res: Response, next: NextFunction) {
         try {
+            if (shouldBypassLimitsInDevMode(req)) {
+                next();
+                return;
+            }
             const user = req.user;
             if (!user || !user.id) {
                 ResponseWriter.unauthorized(res);

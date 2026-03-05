@@ -35,6 +35,7 @@ model Contract {
   title        String
   description  String?
   contractType ContractType
+  chain        Chain        @default(BASE)
   code         String?
   codeHash     String?
   s3_url       String?
@@ -62,6 +63,8 @@ model Contract {
   buildJob                  BuildJob[]
   messages                  Message[]
   contractGenerationReviews ContractGenerationReviews[]
+
+  @@index([chain, createdAt])
 }
 
 model FileUpload {
@@ -81,22 +84,29 @@ model Template {
   title            String
   description      String?
   category         String
+  chain            Chain    @default(BASE)
   tags             String[]
   s3_prefix        String?
-  solanaVersion    String
-  anchorVersion    String
+  solanaVersion    String?
+  anchorVersion    String?
+  baseNetwork      String?
+  frontendStack    String?
+  runtimeStack     String?
   summarisedObject String
   imageUrl         String
 
   message   Message[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+
+  @@index([chain, createdAt])
 }
 
 model BuildJob {
   id         String   @id @default(cuid())
   contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
   contractId String
+  chain      Chain    @default(BASE)
 
   jobId   String
   status  BuildStatus
@@ -118,6 +128,7 @@ model BuildJob {
   @@index([contractId, status])
   @@index([jobId])
   @@index([status, createdAt])
+  @@index([chain, createdAt])
 }
 
 enum Command {
@@ -125,6 +136,8 @@ enum Command {
   lighthouse_TEST
   lighthouse_DEPLOY_DEVNET
   lighthouse_DEPLOY_MAINNET
+  lighthouse_DEPLOY_BASE_SEPOLIA
+  lighthouse_DEPLOY_BASE_MAINNET
   lighthouse_VERIFY
 }
 
@@ -142,10 +155,12 @@ model Deployment {
   id          String   @id @default(cuid())
   contract    Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
   contractId  String
-  network     String // devnet/testnet/mainnet
+  chain       Chain    @default(BASE)
+  network     String // e.g. base-sepolia / base-mainnet
   deployedAt  DateTime @default(now())
   txSignature String? // optional Solana transaction signature
   status      String // pending/success/failure
+  metadata    Json?
 
   @@index([contractId])
 }
@@ -230,6 +245,11 @@ enum ContractType {
   DEFI
   MARKETPLACE
   CUSTOM
+}
+
+enum Chain {
+  BASE
+  SOLANA
 }
 
 enum Network {

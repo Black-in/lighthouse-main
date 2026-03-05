@@ -8,7 +8,8 @@ import ResponseWriter from '../../class/response_writer';
 import { generate_contract_schema } from '../../schemas/generate_contract_schema';
 import { ChatRole, Contract, Message, prisma } from '@lighthouse/database';
 import { generator } from '../../services/init';
-import { MODEL } from '@lighthouse/types';
+import { Chain, MODEL } from '@lighthouse/types';
+import { resolveAndGuardChain } from '../../chains/request_guard';
 
 // we are not tracking the plan context count from the user side, future update will have it
 export default async function plan_executor_controller(req: Request, res: Response) {
@@ -23,6 +24,11 @@ export default async function plan_executor_controller(req: Request, res: Respon
         const parsed = generate_contract_schema.safeParse(req.body);
         if (!parsed.success) {
             ResponseWriter.validation_error(res, 'Invalid data');
+            return;
+        }
+
+        const resolved_chain: Chain | null = resolveAndGuardChain(res, parsed.data.chain);
+        if (!resolved_chain) {
             return;
         }
 
@@ -43,12 +49,20 @@ export default async function plan_executor_controller(req: Request, res: Respon
                     id: parsed.data.contract_id,
                     title: 'contractor',
                     contractType: 'CUSTOM',
+                    chain: resolved_chain,
                     userId: user.id,
                 },
                 include: {
                     messages: true,
                 },
             });
+        } else if (contract.chain !== resolved_chain) {
+            ResponseWriter.validation_error(
+                res,
+                `Contract belongs to ${contract.chain} and cannot be used with ${resolved_chain}`,
+                'Chain mismatch',
+            );
+            return;
         }
 
         const message = await prisma.message.create({
@@ -65,6 +79,7 @@ export default async function plan_executor_controller(req: Request, res: Respon
             parsed.data.instruction,
             parsed.data.model || MODEL.GEMINI,
             contract.id,
+            resolved_chain,
             // contract.summarisedObject ? JSON.parse(contract.summarisedObject) : undefined,
         );
 

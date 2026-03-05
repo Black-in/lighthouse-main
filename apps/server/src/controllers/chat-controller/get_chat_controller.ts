@@ -7,6 +7,7 @@ import { Request, Response } from 'express';
 import ResponseWriter from '../../class/response_writer';
 import { prisma } from '@lighthouse/database';
 import { objectStore } from '../../services/init';
+import { Chain } from '@lighthouse/types';
 
 export default async function get_chat_controller(req: Request, res: Response) {
     try {
@@ -26,9 +27,11 @@ export default async function get_chat_controller(req: Request, res: Response) {
             where: {
                 id: contractId,
                 userId: user.id,
+                chain: Chain.BASE,
             },
             select: {
                 id: true,
+                chain: true,
                 title: true,
                 description: true,
                 deployed: true,
@@ -72,6 +75,7 @@ export default async function get_chat_controller(req: Request, res: Response) {
         ResponseWriter.success(
             res,
             {
+                chain: contract.chain,
                 messages: contract.messages,
                 contractFiles: contract_files || '',
             },

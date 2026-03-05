@@ -26,6 +26,10 @@ import create_public_review_controller from '../controllers/review-controller/cr
 import create_contract_review_controller from '../controllers/review-controller/create_contract_review_controller';
 import getContractMessages from '../controllers/contract-controller/getContractMessages';
 import delete_contract_controller from '../controllers/contract-controller/delete_contract_controller';
+import getCreHealthController from '../controllers/health-controller/getCreHealthController';
+import getDeploymentStatus from '../controllers/contract-controller/getDeploymentStatus';
+import registerSelfDeploy from '../controllers/contract-controller/registerSelfDeploy';
+import compileWalletDeployArtifact from '../controllers/contract-controller/compileWalletDeployArtifact';
 
 // <------------------------- MIDDLEWARES ------------------------->
 import authMiddleware from '../middlewares/middleware.auth';
@@ -33,6 +37,7 @@ import subscriptionMiddleware from '../middlewares/middleware.subscription';
 import githubMiddleware from '../middlewares/middleware.github';
 import RateLimit from '../class/rate_limit';
 import DailyRateLimit from '../middlewares/middleware.dailyRateLimit';
+import adminSecretMiddleware from '../middlewares/middleware.adminSecret';
 
 const router: Router = Router();
 
@@ -40,10 +45,22 @@ const router: Router = Router();
 router.post('/sign-in', RateLimit.sign_in_rate_limit, signInController);
 
 // <------------------------- HEALTH-CHECK-ROUTE ------------------------->
-router.get('/health', RateLimit.health_check_rate_limit, async (_req: Request, res: Response) => {
-    await new Promise((t) => setTimeout(t, 5000));
-    res.status(200).json({ message: 'Server is running' });
-});
+router.get(
+    '/health',
+    RateLimit.health_check_rate_limit,
+    authMiddleware,
+    adminSecretMiddleware,
+    (_req: Request, res: Response) => {
+        res.status(200).json({ message: 'Server is running' });
+    },
+);
+router.get(
+    '/health/cre',
+    RateLimit.health_check_rate_limit,
+    authMiddleware,
+    adminSecretMiddleware,
+    getCreHealthController,
+);
 
 // <------------------------- CONTRACT-ROUTES ------------------------->
 router.post(
@@ -144,6 +161,24 @@ router.delete(
     RateLimit.delete_contract_rate_limit,
     authMiddleware,
     delete_contract_controller,
+);
+router.get(
+    '/contracts/:contractId/deployment-status',
+    RateLimit.get_user_contracts_rate_limit,
+    authMiddleware,
+    getDeploymentStatus,
+);
+router.post(
+    '/contracts/:contractId/self-deploy',
+    RateLimit.get_user_contracts_rate_limit,
+    authMiddleware,
+    registerSelfDeploy,
+);
+router.post(
+    '/contracts/:contractId/compile-wallet-deploy',
+    RateLimit.get_user_contracts_rate_limit,
+    authMiddleware,
+    compileWalletDeployArtifact,
 );
 
 // <------------------------- FILE-ROUTES ------------------------->

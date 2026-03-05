@@ -4,7 +4,7 @@
  */
 
 import winston from 'winston';
-import { logs, SeverityNumber } from '@opentelemetry/api-logs';
+import { logs, Logger as OtlpLogger, SeverityNumber } from '@opentelemetry/api-logs';
 import { trace } from '@opentelemetry/api';
 import { Request, Response } from 'express';
 
@@ -20,8 +20,8 @@ const severityMap: Record<string, SeverityNumber> = {
 };
 
 export default class Logger {
-    private winston_logger: any;
-    private otlp_logger: any;
+    private winston_logger!: winston.Logger;
+    private otlp_logger!: OtlpLogger;
 
     constructor() {
         this.create_winston_logger();

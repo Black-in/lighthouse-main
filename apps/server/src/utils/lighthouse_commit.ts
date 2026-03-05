@@ -5,53 +5,40 @@
 
 export default function generatelighthouseReadme() {
     return `
-# lighthouse – AI-Powered Anchor Contract Workspace
+# lighthouse – AI-Powered Base App Workspace
 
-Welcome to your **lighthouse project**, an AI-assisted environment for building, editing, deploying, and interacting with **Rust-based Solana smart contracts using Anchor**.
+Welcome to your **lighthouse project**, an AI-assisted environment for building, editing, deploying, and interacting with **Base-native applications**.
 
-lighthouse generates your entire contract workspace—programs, clients, SDKs, and frontend examples—and lets you iterate using natural language.
+lighthouse generates your application workspace (frontend + contracts) and lets you iterate using natural language.
 
 ---
 
 ## 🚀 Project Overview
 
-This repository was generated and deployed using **lighthouse**, your AI-powered companion for Solana development.
+This repository was generated and deployed using **lighthouse**, your AI-powered companion for Base development.
 
 Your workspace may include:
 
-- Anchor program (Rust)
-- IDL generation
-- Client SDK bindings (TypeScript)
-- Deployment scripts
-- Optional frontend templates
-- Workspace configuration
+- Frontend app scaffold (Next.js + OnchainKit)
+- Solidity contracts (Foundry)
+- Deployment scripts for Base Sepolia/Mainnet
+- Environment configuration
 
 ---
 
 ## ✏️ How to Edit This Code
 
-lighthouse gives you two ways to work on your contract:
+### 1. Edit in lighthouse (recommended)
 
----
+Continue prompting to:
 
-### **1. Edit in lighthouse (recommended)**
+- Modify app logic
+- Add contract features
+- Regenerate tests
+- Update frontend flows
+- Re-deploy to Base networks
 
-Visit your project inside lighthouse and continue prompting to:
-
-- Modify contract logic
-- Add instructions or accounts
-- Generate tests
-- Produce SDKs
-- Update your frontend
-- Re-deploy to devnet/mainnet-beta
-
-Changes you make in lighthouse are automatically committed to this repo.
-
----
-
-### **2. Edit locally in your IDE**
-
-If you prefer working locally, simply clone this repo:
+### 2. Edit locally in your IDE
 
 \`\`\`sh
 # Step 1: Clone the repository
@@ -60,12 +47,12 @@ git clone <YOUR_GIT_URL>
 # Step 2: Enter the project
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install dependencies (if applicable)
+# Step 3: Install dependencies
 npm install
 # or
-yarn
+pnpm install
 
-# Step 4: Start your local environment or dev server
+# Step 4: Start your local environment
 npm run dev
 \`\`\`
 `.trim();

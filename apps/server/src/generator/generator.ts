@@ -17,8 +17,8 @@ import {
     StreamEventData,
 } from '../types/stream_event_types';
 import { STAGE } from '../types/content_types';
-import { objectStore } from '../services/init';
-import { FileContent, MODEL } from '@lighthouse/types';
+import { cre_deploy_queue, objectStore } from '../services/init';
+import { Chain, FileContent, MODEL } from '@lighthouse/types';
 import { mergeWithLLMFiles, prepareBaseTemplate } from '../class/test';
 import chalk from 'chalk';
 import { finalizer_output_schema } from './schema/finalizer_output_schema';
@@ -37,57 +37,242 @@ import { start_planning_context_prompt } from './prompts/planning_context_prompt
 import { plan_context_schema } from './schema/plan_context_schema';
 import ResponseWriter from '../class/response_writer';
 import { ChatOpenAI } from '@langchain/openai';
+import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import env from '../configs/config.env';
+import { getChainRuntime } from '../chains/registry';
+import { prepareBaseMonorepoTemplate } from '../chains/base/template';
+import { composeCreWorkflow } from '../chains/base/cre_adapter';
+import { BaseMessage } from '@langchain/core/messages';
+
+interface IdlPart {
+    path: string;
+    [key: string]: unknown;
+}
+
+interface FinalizerData {
+    idl: IdlPart[];
+    context: string;
+}
+
+function coerceIdlParts(value: unknown): IdlPart[] {
+    if (!Array.isArray(value)) return [];
+    return value.filter(
+        (item): item is IdlPart =>
+            typeof item === 'object' && item !== null && typeof (item as IdlPart).path === 'string',
+    );
+}
 
 export default class Generator {
-    protected gpt_planner: ChatOpenAI;
-    protected gpt_coder: ChatOpenAI;
-    protected claude_coder: ChatOpenAI;
-    protected gpt_finalizer: ChatOpenAI;
+    protected gpt_planner: ChatOpenAI | ChatGoogleGenerativeAI;
+    protected gpt_coder: ChatOpenAI | ChatGoogleGenerativeAI;
+    protected openai_coder: ChatOpenAI | ChatGoogleGenerativeAI;
+    protected claude_coder: ChatOpenAI | ChatGoogleGenerativeAI;
+    protected gpt_finalizer: ChatOpenAI | ChatGoogleGenerativeAI;
 
     protected parsers: Map<string, StreamParser>;
 
     constructor() {
-        this.gpt_planner = new ChatOpenAI({
-            model: 'moonshotai/kimi-dev-72b',
-            temperature: 0.2,
-            streaming: false,
-            configuration: {
-                baseURL: 'https://openrouter.ai/api/v1',
-                apiKey: env.SERVER_OPENROUTER_KEY,
-            },
-        });
+        const openRouterKey = (env.SERVER_OPENROUTER_KEY || '').trim();
+        const openAiKey = (env.SERVER_OPENAI_API_KEY || '').trim();
+        const openAiPrimaryModel = (env.SERVER_OPENAI_PRIMARY_MODEL || 'gpt-4o-mini').trim();
+        const geminiKey = (env.SERVER_GEMINI_API_KEY || '').trim();
+        const openRouterOpenAiModel = openAiPrimaryModel.includes('/')
+            ? openAiPrimaryModel
+            : `openai/${openAiPrimaryModel}`;
 
-        this.gpt_coder = new ChatOpenAI({
-            model: 'anthropic/claude-sonnet-4.5',
-            temperature: 0.2,
-            streaming: true,
-            configuration: {
-                baseURL: 'https://openrouter.ai/api/v1',
-                apiKey: env.SERVER_OPENROUTER_KEY,
-            },
-        });
+        if (openRouterKey) {
+            this.gpt_planner = new ChatOpenAI({
+                model: 'moonshotai/kimi-dev-72b',
+                temperature: 0.2,
+                streaming: false,
+                configuration: {
+                    baseURL: 'https://openrouter.ai/api/v1',
+                    apiKey: openRouterKey,
+                },
+            });
 
-        this.claude_coder = new ChatOpenAI({
-            model: 'anthropic/claude-3.7-sonnet',
-            temperature: 0.2,
-            streaming: true,
-            configuration: {
-                baseURL: 'https://openrouter.ai/api/v1',
-                apiKey: env.SERVER_OPENROUTER_KEY,
-            },
-        });
+            this.gpt_coder = new ChatOpenAI({
+                model: 'google/gemini-2.0-flash-001',
+                temperature: 0.2,
+                streaming: true,
+                configuration: {
+                    baseURL: 'https://openrouter.ai/api/v1',
+                    apiKey: openRouterKey,
+                },
+            });
 
-        this.gpt_finalizer = new ChatOpenAI({
-            model: 'openai/gpt-4o-mini',
-            temperature: 0.2,
-            configuration: {
-                baseURL: 'https://openrouter.ai/api/v1',
-                apiKey: env.SERVER_OPENROUTER_KEY,
-            },
-        });
+            this.openai_coder = new ChatOpenAI({
+                model: openRouterOpenAiModel,
+                temperature: 0.2,
+                streaming: true,
+                configuration: {
+                    baseURL: 'https://openrouter.ai/api/v1',
+                    apiKey: openRouterKey,
+                },
+            });
+
+            this.claude_coder = new ChatOpenAI({
+                model: 'anthropic/claude-3.7-sonnet',
+                temperature: 0.2,
+                streaming: true,
+                configuration: {
+                    baseURL: 'https://openrouter.ai/api/v1',
+                    apiKey: openRouterKey,
+                },
+            });
+
+            this.gpt_finalizer = new ChatOpenAI({
+                model: 'openai/gpt-4o-mini',
+                temperature: 0.2,
+                configuration: {
+                    baseURL: 'https://openrouter.ai/api/v1',
+                    apiKey: openRouterKey,
+                },
+            });
+        } else {
+            const fallbackOpenAi = openAiKey
+                ? new ChatOpenAI({
+                      model: openAiPrimaryModel,
+                      temperature: 0.2,
+                      streaming: true,
+                      configuration: {
+                          apiKey: openAiKey,
+                      },
+                  })
+                : null;
+
+            const fallbackGemini = geminiKey
+                ? new ChatGoogleGenerativeAI({
+                      model: 'gemini-2.5-flash',
+                      temperature: 0.2,
+                      apiKey: geminiKey,
+                  })
+                : null;
+
+            if (!fallbackOpenAi && !fallbackGemini) {
+                console.warn(
+                    'No LLM keys configured. Set SERVER_OPENAI_API_KEY or SERVER_GEMINI_API_KEY (or SERVER_OPENROUTER_KEY). Generation requests will fail until configured.',
+                );
+            }
+
+            const finalFallbackClient =
+                fallbackOpenAi ||
+                fallbackGemini ||
+                new ChatOpenAI({
+                    model: 'gpt-4o-mini',
+                    temperature: 0.2,
+                    streaming: true,
+                    configuration: {
+                        apiKey: 'missing-key',
+                    },
+                });
+
+            this.gpt_planner = fallbackOpenAi || fallbackGemini || finalFallbackClient;
+            this.gpt_coder = fallbackGemini || fallbackOpenAi || finalFallbackClient;
+            this.openai_coder = fallbackOpenAi || fallbackGemini || finalFallbackClient;
+            this.claude_coder = fallbackOpenAi || fallbackGemini || finalFallbackClient;
+            this.gpt_finalizer = fallbackOpenAi || fallbackGemini || finalFallbackClient;
+        }
 
         this.parsers = new Map<string, StreamParser>();
+    }
+
+    private shouldEnqueueCreDeploy(): boolean {
+        const hasApiKey = Boolean((env.SERVER_CRE_API_KEY || '').trim());
+        return hasApiKey;
+    }
+
+    private buildFallbackFinalizerData(generated_files: FileContent[]): FinalizerData {
+        const contractFiles = generated_files.filter((file) => file.path.endsWith('.sol')).length;
+        const testFiles = generated_files.filter(
+            (file) => file.path.endsWith('.t.sol') || file.path.endsWith('.spec.ts'),
+        ).length;
+        const frontendFiles = generated_files.filter((file) =>
+            file.path.startsWith('apps/web/'),
+        ).length;
+        const keyPaths = generated_files
+            .slice(0, 12)
+            .map((file) => file.path)
+            .join(', ');
+
+        return {
+            idl: generated_files.slice(0, 40).map((file) => ({
+                path: file.path,
+                type: file.path.split('.').pop() || 'file',
+            })),
+            context: [
+                `Generated ${generated_files.length} files for a Base-native workspace.`,
+                `Contracts: ${contractFiles}, tests: ${testFiles}, frontend files: ${frontendFiles}.`,
+                keyPaths ? `Key files: ${keyPaths}.` : '',
+            ]
+                .filter(Boolean)
+                .join(' '),
+        };
+    }
+
+    private mapGenerationErrorMessage(rawMessage: string): string {
+        const normalized = rawMessage.toLowerCase();
+        if (
+            normalized.includes('model_not_found') ||
+            normalized.includes('does not exist or you do not have access')
+        ) {
+            return `OpenAI model access error. Set SERVER_OPENAI_PRIMARY_MODEL to an allowed model (current: ${
+                env.SERVER_OPENAI_PRIMARY_MODEL || 'gpt-4o-mini'
+            }) and restart the server.`;
+        }
+        return rawMessage;
+    }
+
+    private normalizeFinalizerData(value: unknown, generated_files: FileContent[]): FinalizerData {
+        const fallback = this.buildFallbackFinalizerData(generated_files);
+        if (!value || typeof value !== 'object') {
+            return fallback;
+        }
+
+        const payload = value as { idl?: unknown; context?: unknown };
+        const context =
+            typeof payload.context === 'string' && payload.context.trim().length > 0
+                ? payload.context
+                : fallback.context;
+
+        return {
+            idl: coerceIdlParts(payload.idl),
+            context,
+        };
+    }
+
+    private async invokeFinalizerWithTimeout(
+        finalizer_chain: {
+            invoke: (input: { generated_files: FileContent[] }) => Promise<unknown>;
+        },
+        generated_files: FileContent[],
+    ): Promise<FinalizerData> {
+        const timeoutMs = 20_000;
+        let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+
+        try {
+            const result = await Promise.race([
+                finalizer_chain.invoke({ generated_files }),
+                new Promise<never>((_resolve, reject) => {
+                    timeoutHandle = setTimeout(() => {
+                        reject(
+                            new Error(
+                                `Finalizer timed out after ${timeoutMs}ms. Falling back to deterministic summary.`,
+                            ),
+                        );
+                    }, timeoutMs);
+                }),
+            ]);
+
+            return this.normalizeFinalizerData(result, generated_files);
+        } catch (error) {
+            console.error('Finalizer invoke failed; using fallback summary.', error);
+            return this.buildFallbackFinalizerData(generated_files);
+        } finally {
+            if (timeoutHandle) {
+                clearTimeout(timeoutHandle);
+            }
+        }
     }
 
     public async generate(
@@ -96,18 +281,20 @@ export default class Generator {
         user_instruction: string,
         model: MODEL,
         contract_id: string,
+        chain: Chain = Chain.BASE,
         idl?: Object[],
     ) {
         const parser = this.get_parser(contract_id, res);
         try {
             this.create_stream(res);
+            getChainRuntime(chain);
 
             // this check represents that chain is created without any errors
-            const chain = this.get_chains(chat, model);
-            if (!chain) {
+            const runtime_chains = this.get_chains(chat, model, chain);
+            if (!runtime_chains) {
                 throw new Error('chains not created');
             }
-            const { planner_chain, coder_chain, finalizer_chain } = chain;
+            const { planner_chain, coder_chain, finalizer_chain } = runtime_chains;
 
             // make the contract busy
             await this.update_contract_state(contract_id, GenerationStatus.GENERATING);
@@ -121,6 +308,7 @@ export default class Generator {
                         finalizer_chain,
                         user_instruction,
                         contract_id,
+                        chain,
                         parser,
                     );
                     return;
@@ -134,6 +322,7 @@ export default class Generator {
                             finalizer_chain,
                             user_instruction,
                             contract_id,
+                            chain,
                             parser,
                             idl,
                         );
@@ -154,6 +343,7 @@ export default class Generator {
         finalizer_chain: new_finalizer,
         user_instruction: string,
         contract_id: string,
+        chain: Chain,
         parser: StreamParser,
     ) {
         try {
@@ -165,6 +355,13 @@ export default class Generator {
             const full_response: string = '';
 
             console.log(planner_data);
+            const cre_workflow = composeCreWorkflow(user_instruction);
+            const chain_plan =
+                chain === Chain.BASE
+                    ? `${planner_data.plan}\n\nCRE Workflow (Base): ${JSON.stringify(
+                          cre_workflow.steps,
+                      )}`
+                    : planner_data.plan;
 
             const llm_message = await prisma.message.create({
                 data: {
@@ -219,7 +416,7 @@ export default class Generator {
             this.send_sse(res, STAGE.PLANNING, { stage: 'Planning' }, system_message);
 
             const code_stream = await coder_chain.stream({
-                plan: planner_data.plan,
+                plan: chain_plan,
                 files_likely_affected: planner_data.files_likely_affected,
             });
 
@@ -278,7 +475,10 @@ export default class Generator {
 
             const llm_generated_files: FileContent[] = parser.getGeneratedFiles();
             console.log('llm generated files: ', llm_generated_files);
-            const base_files: FileContent[] = prepareBaseTemplate(planner_data.contract_name);
+            const base_files: FileContent[] =
+                chain === Chain.BASE
+                    ? prepareBaseMonorepoTemplate(planner_data.contract_name, user_instruction)
+                    : prepareBaseTemplate(planner_data.contract_name);
             const final_code: FileContent[] = mergeWithLLMFiles(base_files, llm_generated_files);
 
             system_message = await prisma.message.update({
@@ -331,9 +531,10 @@ export default class Generator {
             console.log('the stage: ', chalk.green('Finalizing'));
             this.send_sse(res, STAGE.FINALIZING, { stage: 'Finalizing' }, system_message);
 
-            const finalizer_data = await finalizer_chain.invoke({
-                generated_files: generated_files,
-            });
+            const finalizer_data = await this.invokeFinalizerWithTimeout(
+                finalizer_chain,
+                generated_files,
+            );
 
             system_message = await prisma.message.update({
                 where: {
@@ -363,7 +564,24 @@ export default class Generator {
                 system_message,
             );
 
-            objectStore.uploadContractFiles(contract_id, generated_files, full_response);
+            await objectStore.uploadContractFiles(contract_id, generated_files, full_response);
+
+            if (this.shouldEnqueueCreDeploy()) {
+                void cre_deploy_queue
+                    .enqueue_deploy({
+                        chain: 'BASE',
+                        contractId: contract_id,
+                        network: 'base-sepolia',
+                        createdAt: Date.now(),
+                    })
+                    .catch((error) => {
+                        console.error('failed to enqueue cre-deploy job', error);
+                    });
+            } else {
+                console.log(
+                    'Skipping CRE deploy enqueue because SERVER_CRE_API_KEY is not configured.',
+                );
+            }
 
             // save the idl to data base
             await prisma.contract.update({
@@ -376,6 +594,29 @@ export default class Generator {
             });
         } catch (error) {
             console.error('Error while finalizing: ', error);
+            const errorMessage = error instanceof Error ? error.message : 'Unknown finalizer error';
+            try {
+                system_message = await prisma.message.update({
+                    where: {
+                        id: system_message.id,
+                        contractId: contract_id,
+                    },
+                    data: {
+                        stage: STAGE.ERROR,
+                    },
+                });
+            } catch (stageError) {
+                console.error('Failed to mark finalizer stage as error', stageError);
+            }
+            this.send_sse(
+                res,
+                PHASE_TYPES.ERROR,
+                {
+                    message: 'Finalizing failed',
+                    error: errorMessage,
+                },
+                system_message,
+            );
         } finally {
             parser.reset();
             this.delete_parser(contract_id);
@@ -391,6 +632,7 @@ export default class Generator {
         finalizer_chain: old_finalizer,
         user_instruction: string,
         contract_id: string,
+        _chain: Chain,
         parser: StreamParser,
         idl: Object[],
     ) {
@@ -546,9 +788,10 @@ export default class Generator {
             console.log('the stage: ', chalk.green('Finalizing'));
             this.send_sse(res, STAGE.FINALIZING, { stage: 'Finalizing' }, system_message);
 
-            const finalizer_data = await finalizer_chain.invoke({
-                generated_files: generated_files,
-            });
+            const finalizer_data = await this.invokeFinalizerWithTimeout(
+                finalizer_chain,
+                generated_files,
+            );
 
             system_message = await prisma.message.update({
                 where: {
@@ -581,6 +824,29 @@ export default class Generator {
             this.update_idl(contract_id, finalizer_data.idl, delete_files);
         } catch (error) {
             console.error('Error while finalizing: ', error);
+            const errorMessage = error instanceof Error ? error.message : 'Unknown finalizer error';
+            try {
+                system_message = await prisma.message.update({
+                    where: {
+                        id: system_message.id,
+                        contractId: contract_id,
+                    },
+                    data: {
+                        stage: STAGE.ERROR,
+                    },
+                });
+            } catch (stageError) {
+                console.error('Failed to mark finalizer stage as error', stageError);
+            }
+            this.send_sse(
+                res,
+                PHASE_TYPES.ERROR,
+                {
+                    message: 'Finalizing failed',
+                    error: errorMessage,
+                },
+                system_message,
+            );
         } finally {
             parser.reset();
             this.delete_parser(contract_id);
@@ -635,7 +901,7 @@ export default class Generator {
 
     protected async update_idl(
         contract_id: string,
-        generated_idl_parts: any[],
+        generated_idl_parts: IdlPart[],
         deleting_files_path: string[],
     ) {
         try {
@@ -660,14 +926,12 @@ export default class Generator {
                 return;
             }
 
-            const idl = JSON.parse(contract.summarisedObject);
+            const idl = coerceIdlParts(JSON.parse(contract.summarisedObject));
 
-            const remainingIdl = idl.filter(
-                (item: any) => !deleting_files_path.includes(item.path),
-            );
+            const remainingIdl = idl.filter((item) => !deleting_files_path.includes(item.path));
 
-            const existingIdlMap = new Map(remainingIdl.map((item: any) => [item.path, item]));
-            const newIdlParts: any[] = [];
+            const existingIdlMap = new Map(remainingIdl.map((item) => [item.path, item]));
+            const newIdlParts: IdlPart[] = [];
 
             for (const gen_i of generated_idl_parts) {
                 const existingIdl = existingIdlMap.get(gen_i.path);
@@ -697,17 +961,28 @@ export default class Generator {
     protected get_chains(
         chat: 'new' | 'old',
         model: MODEL,
+        chain: Chain,
     ): {
         planner_chain: RunnableSequence;
         coder_chain: Runnable;
         finalizer_chain: RunnableSequence;
     } | null {
         try {
+            if (chain !== Chain.BASE) {
+                // DISABLED - Solana chain (see /chains/solana).
+                throw new Error(`Unsupported chain for runtime: ${chain}`);
+            }
+
             let planner_chain;
             let coder_chain;
             let finalizer_chain;
 
-            const coder = model === MODEL.CLAUDE ? this.claude_coder : this.gpt_coder;
+            const coder =
+                model === MODEL.CLAUDE
+                    ? this.claude_coder
+                    : model === MODEL.OPENAI_GPT_5_3
+                      ? this.openai_coder
+                      : this.gpt_coder;
 
             switch (chat) {
                 case 'new': {
@@ -742,7 +1017,7 @@ export default class Generator {
                         .pipe(Tool.convert)
                         .pipe(
                             new RunnableLambda({
-                                func: ({ messages }: { messages: any }) => [
+                                func: ({ messages }: { messages: BaseMessage[] }) => [
                                     ...messages,
                                     {
                                         role: 'user',
@@ -778,9 +1053,11 @@ export default class Generator {
         user_instruction: string,
         model: MODEL,
         contract_id: string,
+        chain: Chain = Chain.BASE,
         // idl?: Object[],
     ) {
         try {
+            getChainRuntime(chain);
             const planner_chain = RunnableSequence.from([
                 start_planning_context_prompt,
                 this.gpt_planner.withStructuredOutput(plan_context_schema),
@@ -919,6 +1196,12 @@ export default class Generator {
         parser: StreamParser,
     ) {
         console.error(`Error in ${coming_from_fn}`, error);
+        const rawErrorMessage = error instanceof Error ? error.message : 'Unknown generator error';
+        const errorMessage = this.mapGenerationErrorMessage(rawErrorMessage);
+        this.send_sse(res, PHASE_TYPES.ERROR, {
+            message: `Generation failed in ${coming_from_fn}`,
+            error: errorMessage,
+        });
         parser.reset();
         this.delete_parser(contract_id);
         this.update_contract_state(contract_id, GenerationStatus.IDLE);

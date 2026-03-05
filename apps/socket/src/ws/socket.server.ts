@@ -70,6 +70,17 @@ export default class WebSocketServer {
     }
 
     private async handle_incoming_message<T>(ws: CustomWebSocket, message: ParsedMessage<T>) {
+        const disabledSolanaPayload = (): WSServerIncomingPayload<IncomingPayload> => ({
+            type: TerminalSocketData.VALIDATION_ERROR,
+            payload: {
+                userId: ws.user.id,
+                contractId: ws.contractId,
+                // DISABLED - Solana chain (see /chains/solana).
+                line: 'Solana deploy commands are disabled. Use lighthouse_DEPLOY_BASE_SEPOLIA or lighthouse_DEPLOY_BASE_MAINNET.',
+                timestamp: Date.now(),
+            },
+        });
+
         switch (message.type as COMMAND) {
             case COMMAND.lighthouse_BUILD: {
                 const data = await CommandService.handle_incoming_command(ws, message);
@@ -82,11 +93,19 @@ export default class WebSocketServer {
                 return;
             }
             case COMMAND.lighthouse_DEPLOY_DEVNET: {
+                this.send_message(ws, disabledSolanaPayload());
+                return;
+            }
+            case COMMAND.lighthouse_DEPLOY_MAINNET: {
+                this.send_message(ws, disabledSolanaPayload());
+                return;
+            }
+            case COMMAND.lighthouse_DEPLOY_BASE_SEPOLIA: {
                 const data = await CommandService.handle_incoming_command(ws, message);
                 this.send_message(ws, data);
                 return;
             }
-            case COMMAND.lighthouse_DEPLOY_MAINNET: {
+            case COMMAND.lighthouse_DEPLOY_BASE_MAINNET: {
                 const data = await CommandService.handle_incoming_command(ws, message);
                 this.send_message(ws, data);
                 return;
@@ -156,7 +175,7 @@ export default class WebSocketServer {
             payload: {
                 userId: ws.user.id,
                 contractId: contractId,
-                line: 'You are now connected to the soket.',
+                line: 'You are now connected to the socket.',
                 timestamp: Date.now(),
             },
         };

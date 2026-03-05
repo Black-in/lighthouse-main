@@ -139,6 +139,7 @@ exports.Prisma.ContractScalarFieldEnum = {
   title: 'title',
   description: 'description',
   contractType: 'contractType',
+  chain: 'chain',
   code: 'code',
   codeHash: 'codeHash',
   s3_url: 's3_url',
@@ -171,10 +172,14 @@ exports.Prisma.TemplateScalarFieldEnum = {
   title: 'title',
   description: 'description',
   category: 'category',
+  chain: 'chain',
   tags: 'tags',
   s3_prefix: 's3_prefix',
   solanaVersion: 'solanaVersion',
   anchorVersion: 'anchorVersion',
+  baseNetwork: 'baseNetwork',
+  frontendStack: 'frontendStack',
+  runtimeStack: 'runtimeStack',
   summarisedObject: 'summarisedObject',
   imageUrl: 'imageUrl',
   createdAt: 'createdAt',
@@ -184,6 +189,7 @@ exports.Prisma.TemplateScalarFieldEnum = {
 exports.Prisma.BuildJobScalarFieldEnum = {
   id: 'id',
   contractId: 'contractId',
+  chain: 'chain',
   jobId: 'jobId',
   status: 'status',
   podName: 'podName',
@@ -202,10 +208,12 @@ exports.Prisma.BuildJobScalarFieldEnum = {
 exports.Prisma.DeploymentScalarFieldEnum = {
   id: 'id',
   contractId: 'contractId',
+  chain: 'chain',
   network: 'network',
   deployedAt: 'deployedAt',
   txSignature: 'txSignature',
-  status: 'status'
+  status: 'status',
+  metadata: 'metadata'
 };
 
 exports.Prisma.MessageScalarFieldEnum = {
@@ -290,6 +298,11 @@ exports.ContractType = exports.$Enums.ContractType = {
   CUSTOM: 'CUSTOM'
 };
 
+exports.Chain = exports.$Enums.Chain = {
+  BASE: 'BASE',
+  SOLANA: 'SOLANA'
+};
+
 exports.BuildStatus = exports.$Enums.BuildStatus = {
   NEVER_BUILT: 'NEVER_BUILT',
   PENDING: 'PENDING',
@@ -310,6 +323,8 @@ exports.Command = exports.$Enums.Command = {
   lighthouse_TEST: 'lighthouse_TEST',
   lighthouse_DEPLOY_DEVNET: 'lighthouse_DEPLOY_DEVNET',
   lighthouse_DEPLOY_MAINNET: 'lighthouse_DEPLOY_MAINNET',
+  lighthouse_DEPLOY_BASE_SEPOLIA: 'lighthouse_DEPLOY_BASE_SEPOLIA',
+  lighthouse_DEPLOY_BASE_MAINNET: 'lighthouse_DEPLOY_BASE_MAINNET',
   lighthouse_VERIFY: 'lighthouse_VERIFY'
 };
 

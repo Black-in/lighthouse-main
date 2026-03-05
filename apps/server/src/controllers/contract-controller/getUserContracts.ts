@@ -6,6 +6,7 @@
 import { Request, Response } from 'express';
 import ResponseWriter from '../../class/response_writer';
 import { prisma } from '@lighthouse/database';
+import { Chain } from '@lighthouse/types';
 
 export default async function getUserContracts(req: Request, res: Response) {
     const user = req.user;
@@ -20,11 +21,15 @@ export default async function getUserContracts(req: Request, res: Response) {
             select: {
                 contracts: {
                     take: 6,
+                    where: {
+                        chain: Chain.BASE,
+                    },
                     orderBy: {
                         createdAt: 'desc',
                     },
                     select: {
                         id: true,
+                        chain: true,
                         title: true,
                         description: true,
                         contractType: true,

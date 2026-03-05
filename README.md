@@ -1,148 +1,96 @@
-# lighthouse: AI-Powered Rust Smart Contract Platform
+# Lighthouse Main (Backend)
 
-**lighthouse** is an AI-powered platform for building, editing, deploying, and interacting with Rust-based smart contracts on Solana using Anchor. It aims to simplify the entire smart contract workflow, from AI-assisted contract generation to client SDK creation and frontend integration.
+`lighthouse-main` is the backend and orchestration service for BlackIn, a Base-only AI code editor that converts a prompt into a generated workspace and CRE-backed deployment flow.
 
----
+## Active Chain Model
 
-## **Core Features**
+- Base is the only active chain in runtime behavior.
+- Solana code is retained for legacy reference and is disabled in API/socket command paths.
 
-### **1. AI Contract Generation**
+## Core Flow (Single Prompt to Deployment)
 
-- Generate Rust-based Anchor contracts from natural language descriptions.
-- Use pre-built templates for common Solana programs:
-  - Token contracts
-  - NFT contracts
-  - DeFi programs
-  - Escrow or payment programs
-- Option to generate modular contracts with separate instructions, accounts, and error enums.
+1. `POST /api/v1/generate` receives a prompt (defaults to `chain=BASE`).
+2. Generator creates workspace files (web app, contracts, CRE workflow artifacts).
+3. Files are uploaded to object storage.
+4. A `cre-deploy` queue job runs workflow lifecycle steps:
+   - `workflow simulate`
+   - `workflow deploy`
+   - `workflow activate`
+5. Deployment metadata is persisted (`Deployment`, `BuildJob`, `Contract`) and streamed to clients.
 
-### **2. Smart Contract Editor**
+## CRE Runtime Requirements
 
-- Rich code editor with Rust syntax highlighting (Monaco/CodeMirror).
-- Live preview of contract structure: instructions, accounts, events.
-- Refactoring tools:
-  - Rename instructions
-  - Restructure accounts
-- Highlight mismatches between contract code and Anchor conventions.
+- CRE CLI available (`cre version` must work).
+- Foundry (`forge --version` must work).
+- `SERVER_CRE_API_KEY` configured.
+- `SERVER_CRE_ETH_PRIVATE_KEY` or `SERVER_BASE_DEPLOYER_PRIVATE_KEY` configured.
+- Base and Ethereum RPC URLs configured.
+- Deploy access enabled on your CRE organization.
 
-### **3. IDL & Metadata Generation**
+## Local Run (Access Pending Safe Mode)
 
-- Auto-generate IDL for the contract.
-- Generate deployment artifacts like `Cargo.toml`, build scripts, and client SDKs.
+If CRE deploy access is still pending approval, backend/socket/frontend can still run locally for all non-deploy flows.
 
----
+### 1) Start infrastructure
 
-## **AI-Powered Enhancements**
+```bash
+cd /Users/ayushsrivastava/BlackIn/lighthouse-main
+docker compose up -d postgres redis
+pnpm db:migrate:deploy
+```
 
-### **1. Contract Assistor**
+### 2) Start backend and socket
 
-- Suggest improvements to contract logic.
-- Optimize instructions and reduce contract size.
-- Detect redundant or unsafe logic.
-- Generate documentation and comments inline.
-- Suggest type-safe account layouts and commonly used structs.
-- Warn about known vulnerabilities (unchecked seeds, missing payer checks, etc.).
+```bash
+pnpm --filter server dev
+pnpm --filter socket dev
+```
 
-### **2. Summarization & Explanation**
+### 3) Start frontend
 
-- Human-readable summaries for instructions, account requirements, and errors.
-- Security considerations explained in plain English.
+From `lighthouse-club`:
 
-### **3. Feature Suggestions**
+```bash
+pnpm --filter web dev
+```
 
-- AI suggests additional instructions or functionalities based on contract type.
-- Boilerplate for admin functionality, royalties, or access control.
+### 4) Verify listeners
 
----
+- Backend: `http://localhost:8787`
+- Socket: `ws://localhost:8282`
+- Frontend: `http://localhost:3000`
 
-## **Developer Utilities**
+## CRE Access Diagnostics
 
-- **Version Control**
-  - Auto-save versions and rollback capabilities.
-- **Testing & Simulation**
-  - Auto-generate Anchor test scripts.
-  - Simulate transactions in-browser or on devnet.
-- **Contract Visualization**
-  - Graphical representation of instructions, accounts, and relationships.
+Use CLI to verify current account state:
 
-- **Code Snippets**
-  - Predefined modular snippets (e.g., PDA creation, token minting, escrow logic).
+```bash
+cre version
+cre whoami
+cre account access
+cre account list-key
+```
 
----
+If `Deploy Access: Not enabled`, workflow deploy and key linking remain blocked until Chainlink approval.
 
-## **Deployment & Post-Deployment Features**
+## Security and Operations Notes
 
-- **One-Click Deployment**
-  - Deploy to Solana Devnet, Testnet, or Mainnet.
-  - Auto-generate CLI commands for deployment.
-- **ID/Address Management**
-  - Track deployed program IDs.
-  - Generate client SDKs to interact with deployed contracts.
+- CORS allowlist is enforced via `SERVER_CORS_ORIGINS`.
+- CRE readiness endpoint is protected by auth and admin-secret middleware.
+- Startup preflight strictness is controlled by `SERVER_CRE_STARTUP_PRECHECK_REQUIRED`.
+- Staging CRE E2E workflow runs on `main`, `release/*`, and `rc/*` pushes.
+- Release runbook: `docs/operations/staging_cre_release_runbook.md`.
 
-- **Monitoring & Analytics**
-  - Display usage stats: calls per instruction, errors, deprecated patterns.
+## Developer Commands
 
----
+```bash
+pnpm --filter server lint
+pnpm --filter server run test:cre
+pnpm --filter server run test:api
+pnpm --filter server build
+pnpm --filter server run smoke:cre-e2e
+```
 
-## **Client Generation & Integration**
+## Repository Notes
 
-- **AI-Powered Client SDK**
-  - Automatically generate TypeScript/JavaScript client.
-  - Functions for each instruction with typed inputs/outputs.
-  - Pre-configured Anchor Provider and wallet integration.
-  - Helper functions for PDAs, token minting, and transactions.
-
-- **Frontend Boilerplate**
-  - React/Next.js starter project prewired with wallet adapters.
-  - Hooks for each contract instruction.
-  - Example UI components (forms, buttons) linked to instructions.
-
-- **Integration AI Assist**
-  - Suggest UI patterns based on contract type:
-    - NFT → gallery + mint button
-    - Token → transfer + balance display
-    - DeFi → swap/exchange interface
-  - Auto-generate ID to UI mapping for account balances, token states, etc.
-
-- **Testing & Simulation**
-  - Generate frontend integration tests.
-  - Simulate transactions in-browser for UX validation.
-
-- **Deployment + Client Bundling**
-  - Deploy contract and generate client SDK for immediate use.
-  - Instructions for integrating SDK into other projects.
-
----
-
-## **Optional “Lovable” Features**
-
-- **Interactive AI Chat**
-  - Ask questions about contracts: e.g., “Which accounts are required?” or “How to implement royalties?”
-- **Collaboration**
-  - Share contracts with other developers for co-editing and review.
-- **Template Marketplace**
-  - Community-curated or official contract templates ready to customize.
-
-- **Security Checklist**
-  - AI-powered checklist: seeds, admin restrictions, rent exemption checks.
-
-- **Export Options**
-  - Export contract + IDL + tests + deployment scripts as a complete package.
-
-- **Interactive Sandbox**
-  - Test contract interactions through a generated client without writing frontend code.
-
----
-
-## **Workflow Overview**
-
-1. **Generate Contract** → AI creates Anchor contract from specification.
-2. **Edit & Improve** → Rich editor with AI suggestions and refactoring.
-3. **Generate IDL & Client** → Auto-generate IDL and client SDK.
-4. **Deploy** → One-click deployment to Solana network.
-5. **Integrate & Test** → Use generated frontend boilerplate and simulate transactions.
-6. **Monitor & Iterate** → Track usage stats, errors, and receive AI improvement suggestions.
-
----
-
-**Lovable for Anchor** makes building Solana programs faster, safer, and more approachable for developers of all levels.
+- Keep legacy Solana code for reference only; do not activate it in runtime behavior.

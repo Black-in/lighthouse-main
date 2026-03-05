@@ -16,6 +16,24 @@ import { BaseMessage, ToolMessage } from '@langchain/core/messages';
 
 const RULES_DIR = path.resolve(process.cwd(), 'dist/rules');
 
+interface ToolCallPayload {
+    id: string;
+    name: string;
+    args: unknown;
+}
+
+interface ToolMessageInput {
+    tool_calls?: ToolCallPayload[];
+    tool_call_chunks?: ToolCallPayload[];
+}
+
+interface ToolInvocationResult {
+    id: string;
+    name: string;
+    args: unknown;
+    result: unknown;
+}
+
 export default class Tool {
     /**
      * for fetching rule file from tool call
@@ -92,9 +110,9 @@ export default class Tool {
      * creates a runnable-lambda that executes tool-calling by using specific paths
      */
     public static runner = new RunnableLambda({
-        func: async (aiMessage: any) => {
+        func: async (aiMessage: ToolMessageInput) => {
             const toolCalls = aiMessage.tool_calls ?? aiMessage.tool_call_chunks ?? [];
-            const results: Record<string, any>[] = [];
+            const results: ToolInvocationResult[] = [];
 
             for (const tc of toolCalls) {
                 const toolImpl = Tool.TOOL_REGISTRY[tc.name];
@@ -122,21 +140,21 @@ export default class Tool {
         },
     });
 
-    public static convert = new RunnableLambda<{ toolResults: any[] }, { messages: BaseMessage[] }>(
-        {
-            func: ({ toolResults }: { toolResults: any }) => ({
-                messages: toolResults.map(
-                    (t: any) =>
-                        new ToolMessage({
-                            name: t.name,
-                            tool_call_id: t.id,
-                            content:
-                                typeof t.result === 'string' ? t.result : JSON.stringify(t.result),
-                        }),
-                ),
-            }),
-        },
-    );
+    public static convert = new RunnableLambda<
+        { toolResults: ToolInvocationResult[] },
+        { messages: BaseMessage[] }
+    >({
+        func: ({ toolResults }: { toolResults: ToolInvocationResult[] }) => ({
+            messages: toolResults.map(
+                (t) =>
+                    new ToolMessage({
+                        name: t.name,
+                        tool_call_id: t.id,
+                        content: typeof t.result === 'string' ? t.result : JSON.stringify(t.result),
+                    }),
+            ),
+        }),
+    });
 
     /**
      * finds all the rules file and remover their extension and return the name

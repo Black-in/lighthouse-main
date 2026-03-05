@@ -7,6 +7,7 @@ import { NODE } from "../file_types/file_types";
 import { STAGE } from "../generator/content_types";
 import {
   BuildStatus,
+  Chain,
   ChatRole,
   Command,
   ContractType,
@@ -41,6 +42,7 @@ export interface Contract {
   title: string;
   description?: string | null;
   contractType: ContractType;
+  chain: Chain;
   idl?: JSON;
   clientSdk?: JSON;
   summarisedObject?: string | null;
@@ -59,10 +61,12 @@ export interface Deployment {
   id: string;
   contractId: string;
   contract?: Contract;
+  chain: Chain;
   network: string;
   deployedAt: string;
   txSignature?: string | null;
   status: string;
+  metadata?: unknown | null;
 }
 
 export interface Message {
@@ -112,10 +116,14 @@ export interface Template {
   title: string;
   description?: string;
   category: string;
+  chain: Chain;
   tags: string[];
   s3_prefix?: string;
-  solanaVersion: string;
-  anchorVersion: string;
+  solanaVersion?: string;
+  anchorVersion?: string;
+  baseNetwork?: string;
+  frontendStack?: string;
+  runtimeStack?: string;
   summarisedObject: string;
   imageUrl: string;
 
@@ -127,6 +135,7 @@ export interface BuildJob {
   id: string;
   contractId: string;
   contract?: Contract;
+  chain: Chain;
 
   jobId: string;
   status: BuildStatus;

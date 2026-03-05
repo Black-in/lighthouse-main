@@ -7,6 +7,7 @@ import { Request, Response } from 'express';
 import ResponseWriter from '../../class/response_writer';
 import { getContractMessagesSchema } from '../../schemas/get_contract_messages_schema';
 import { prisma } from '@lighthouse/database';
+import { Chain } from '@lighthouse/types';
 
 export default async function getContractMessages(req: Request, res: Response) {
     try {
@@ -26,8 +27,13 @@ export default async function getContractMessages(req: Request, res: Response) {
         const { contractId } = req.body;
         console.log('body: ', req.body);
         const contract_record = await prisma.contract.findUnique({
-            where: { id: contractId },
+            where: {
+                id: contractId,
+                userId: user.id,
+                chain: Chain.BASE,
+            },
             select: {
+                chain: true,
                 messages: true,
             },
         });
@@ -39,6 +45,7 @@ export default async function getContractMessages(req: Request, res: Response) {
             res,
             {
                 messages,
+                chain: contract_record?.chain || Chain.BASE,
                 hasMessages: messages.length > 0,
             },
             'Fetched messages successfully',

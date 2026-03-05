@@ -73,6 +73,8 @@ export namespace $Enums {
   lighthouse_TEST: 'lighthouse_TEST',
   lighthouse_DEPLOY_DEVNET: 'lighthouse_DEPLOY_DEVNET',
   lighthouse_DEPLOY_MAINNET: 'lighthouse_DEPLOY_MAINNET',
+  lighthouse_DEPLOY_BASE_SEPOLIA: 'lighthouse_DEPLOY_BASE_SEPOLIA',
+  lighthouse_DEPLOY_BASE_MAINNET: 'lighthouse_DEPLOY_BASE_MAINNET',
   lighthouse_VERIFY: 'lighthouse_VERIFY'
 };
 
@@ -103,6 +105,14 @@ export const ContractType: {
 };
 
 export type ContractType = (typeof ContractType)[keyof typeof ContractType]
+
+
+export const Chain: {
+  BASE: 'BASE',
+  SOLANA: 'SOLANA'
+};
+
+export type Chain = (typeof Chain)[keyof typeof Chain]
 
 
 export const Network: {
@@ -196,6 +206,10 @@ export const BuildStatus: typeof $Enums.BuildStatus
 export type ContractType = $Enums.ContractType
 
 export const ContractType: typeof $Enums.ContractType
+
+export type Chain = $Enums.Chain
+
+export const Chain: typeof $Enums.Chain
 
 export type Network = $Enums.Network
 
@@ -3272,6 +3286,7 @@ export namespace Prisma {
     title: string | null
     description: string | null
     contractType: $Enums.ContractType | null
+    chain: $Enums.Chain | null
     code: string | null
     codeHash: string | null
     s3_url: string | null
@@ -3293,6 +3308,7 @@ export namespace Prisma {
     title: string | null
     description: string | null
     contractType: $Enums.ContractType | null
+    chain: $Enums.Chain | null
     code: string | null
     codeHash: string | null
     s3_url: string | null
@@ -3314,6 +3330,7 @@ export namespace Prisma {
     title: number
     description: number
     contractType: number
+    chain: number
     code: number
     codeHash: number
     s3_url: number
@@ -3347,6 +3364,7 @@ export namespace Prisma {
     title?: true
     description?: true
     contractType?: true
+    chain?: true
     code?: true
     codeHash?: true
     s3_url?: true
@@ -3368,6 +3386,7 @@ export namespace Prisma {
     title?: true
     description?: true
     contractType?: true
+    chain?: true
     code?: true
     codeHash?: true
     s3_url?: true
@@ -3389,6 +3408,7 @@ export namespace Prisma {
     title?: true
     description?: true
     contractType?: true
+    chain?: true
     code?: true
     codeHash?: true
     s3_url?: true
@@ -3499,6 +3519,7 @@ export namespace Prisma {
     title: string
     description: string | null
     contractType: $Enums.ContractType
+    chain: $Enums.Chain
     code: string | null
     codeHash: string | null
     s3_url: string | null
@@ -3541,6 +3562,7 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     contractType?: boolean
+    chain?: boolean
     code?: boolean
     codeHash?: boolean
     s3_url?: boolean
@@ -3570,6 +3592,7 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     contractType?: boolean
+    chain?: boolean
     code?: boolean
     codeHash?: boolean
     s3_url?: boolean
@@ -3594,6 +3617,7 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     contractType?: boolean
+    chain?: boolean
     code?: boolean
     codeHash?: boolean
     s3_url?: boolean
@@ -3618,6 +3642,7 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     contractType?: boolean
+    chain?: boolean
     code?: boolean
     codeHash?: boolean
     s3_url?: boolean
@@ -3636,7 +3661,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type ContractOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "contractType" | "code" | "codeHash" | "s3_url" | "githubRepoName" | "lastBuildStatus" | "lastBuildId" | "idl" | "clientSdk" | "summarisedObject" | "generationStatus" | "deployed" | "programId" | "version" | "userId" | "createdAt" | "updatedAt", ExtArgs["result"]["contract"]>
+  export type ContractOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "contractType" | "chain" | "code" | "codeHash" | "s3_url" | "githubRepoName" | "lastBuildStatus" | "lastBuildId" | "idl" | "clientSdk" | "summarisedObject" | "generationStatus" | "deployed" | "programId" | "version" | "userId" | "createdAt" | "updatedAt", ExtArgs["result"]["contract"]>
   export type ContractInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     deployments?: boolean | Contract$deploymentsArgs<ExtArgs>
@@ -3666,6 +3691,7 @@ export namespace Prisma {
       title: string
       description: string | null
       contractType: $Enums.ContractType
+      chain: $Enums.Chain
       code: string | null
       codeHash: string | null
       s3_url: string | null
@@ -4114,6 +4140,7 @@ export namespace Prisma {
     readonly title: FieldRef<"Contract", 'String'>
     readonly description: FieldRef<"Contract", 'String'>
     readonly contractType: FieldRef<"Contract", 'ContractType'>
+    readonly chain: FieldRef<"Contract", 'Chain'>
     readonly code: FieldRef<"Contract", 'String'>
     readonly codeHash: FieldRef<"Contract", 'String'>
     readonly s3_url: FieldRef<"Contract", 'String'>
@@ -5760,9 +5787,13 @@ export namespace Prisma {
     title: string | null
     description: string | null
     category: string | null
+    chain: $Enums.Chain | null
     s3_prefix: string | null
     solanaVersion: string | null
     anchorVersion: string | null
+    baseNetwork: string | null
+    frontendStack: string | null
+    runtimeStack: string | null
     summarisedObject: string | null
     imageUrl: string | null
     createdAt: Date | null
@@ -5774,9 +5805,13 @@ export namespace Prisma {
     title: string | null
     description: string | null
     category: string | null
+    chain: $Enums.Chain | null
     s3_prefix: string | null
     solanaVersion: string | null
     anchorVersion: string | null
+    baseNetwork: string | null
+    frontendStack: string | null
+    runtimeStack: string | null
     summarisedObject: string | null
     imageUrl: string | null
     createdAt: Date | null
@@ -5788,10 +5823,14 @@ export namespace Prisma {
     title: number
     description: number
     category: number
+    chain: number
     tags: number
     s3_prefix: number
     solanaVersion: number
     anchorVersion: number
+    baseNetwork: number
+    frontendStack: number
+    runtimeStack: number
     summarisedObject: number
     imageUrl: number
     createdAt: number
@@ -5805,9 +5844,13 @@ export namespace Prisma {
     title?: true
     description?: true
     category?: true
+    chain?: true
     s3_prefix?: true
     solanaVersion?: true
     anchorVersion?: true
+    baseNetwork?: true
+    frontendStack?: true
+    runtimeStack?: true
     summarisedObject?: true
     imageUrl?: true
     createdAt?: true
@@ -5819,9 +5862,13 @@ export namespace Prisma {
     title?: true
     description?: true
     category?: true
+    chain?: true
     s3_prefix?: true
     solanaVersion?: true
     anchorVersion?: true
+    baseNetwork?: true
+    frontendStack?: true
+    runtimeStack?: true
     summarisedObject?: true
     imageUrl?: true
     createdAt?: true
@@ -5833,10 +5880,14 @@ export namespace Prisma {
     title?: true
     description?: true
     category?: true
+    chain?: true
     tags?: true
     s3_prefix?: true
     solanaVersion?: true
     anchorVersion?: true
+    baseNetwork?: true
+    frontendStack?: true
+    runtimeStack?: true
     summarisedObject?: true
     imageUrl?: true
     createdAt?: true
@@ -5921,10 +5972,14 @@ export namespace Prisma {
     title: string
     description: string | null
     category: string
+    chain: $Enums.Chain
     tags: string[]
     s3_prefix: string | null
-    solanaVersion: string
-    anchorVersion: string
+    solanaVersion: string | null
+    anchorVersion: string | null
+    baseNetwork: string | null
+    frontendStack: string | null
+    runtimeStack: string | null
     summarisedObject: string
     imageUrl: string
     createdAt: Date
@@ -5953,10 +6008,14 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     category?: boolean
+    chain?: boolean
     tags?: boolean
     s3_prefix?: boolean
     solanaVersion?: boolean
     anchorVersion?: boolean
+    baseNetwork?: boolean
+    frontendStack?: boolean
+    runtimeStack?: boolean
     summarisedObject?: boolean
     imageUrl?: boolean
     createdAt?: boolean
@@ -5970,10 +6029,14 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     category?: boolean
+    chain?: boolean
     tags?: boolean
     s3_prefix?: boolean
     solanaVersion?: boolean
     anchorVersion?: boolean
+    baseNetwork?: boolean
+    frontendStack?: boolean
+    runtimeStack?: boolean
     summarisedObject?: boolean
     imageUrl?: boolean
     createdAt?: boolean
@@ -5985,10 +6048,14 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     category?: boolean
+    chain?: boolean
     tags?: boolean
     s3_prefix?: boolean
     solanaVersion?: boolean
     anchorVersion?: boolean
+    baseNetwork?: boolean
+    frontendStack?: boolean
+    runtimeStack?: boolean
     summarisedObject?: boolean
     imageUrl?: boolean
     createdAt?: boolean
@@ -6000,17 +6067,21 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     category?: boolean
+    chain?: boolean
     tags?: boolean
     s3_prefix?: boolean
     solanaVersion?: boolean
     anchorVersion?: boolean
+    baseNetwork?: boolean
+    frontendStack?: boolean
+    runtimeStack?: boolean
     summarisedObject?: boolean
     imageUrl?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type TemplateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "category" | "tags" | "s3_prefix" | "solanaVersion" | "anchorVersion" | "summarisedObject" | "imageUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["template"]>
+  export type TemplateOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "category" | "chain" | "tags" | "s3_prefix" | "solanaVersion" | "anchorVersion" | "baseNetwork" | "frontendStack" | "runtimeStack" | "summarisedObject" | "imageUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["template"]>
   export type TemplateInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     message?: boolean | Template$messageArgs<ExtArgs>
     _count?: boolean | TemplateCountOutputTypeDefaultArgs<ExtArgs>
@@ -6028,10 +6099,14 @@ export namespace Prisma {
       title: string
       description: string | null
       category: string
+      chain: $Enums.Chain
       tags: string[]
       s3_prefix: string | null
-      solanaVersion: string
-      anchorVersion: string
+      solanaVersion: string | null
+      anchorVersion: string | null
+      baseNetwork: string | null
+      frontendStack: string | null
+      runtimeStack: string | null
       summarisedObject: string
       imageUrl: string
       createdAt: Date
@@ -6464,10 +6539,14 @@ export namespace Prisma {
     readonly title: FieldRef<"Template", 'String'>
     readonly description: FieldRef<"Template", 'String'>
     readonly category: FieldRef<"Template", 'String'>
+    readonly chain: FieldRef<"Template", 'Chain'>
     readonly tags: FieldRef<"Template", 'String[]'>
     readonly s3_prefix: FieldRef<"Template", 'String'>
     readonly solanaVersion: FieldRef<"Template", 'String'>
     readonly anchorVersion: FieldRef<"Template", 'String'>
+    readonly baseNetwork: FieldRef<"Template", 'String'>
+    readonly frontendStack: FieldRef<"Template", 'String'>
+    readonly runtimeStack: FieldRef<"Template", 'String'>
     readonly summarisedObject: FieldRef<"Template", 'String'>
     readonly imageUrl: FieldRef<"Template", 'String'>
     readonly createdAt: FieldRef<"Template", 'DateTime'>
@@ -6929,6 +7008,7 @@ export namespace Prisma {
   export type BuildJobMinAggregateOutputType = {
     id: string | null
     contractId: string | null
+    chain: $Enums.Chain | null
     jobId: string | null
     status: $Enums.BuildStatus | null
     podName: string | null
@@ -6946,6 +7026,7 @@ export namespace Prisma {
   export type BuildJobMaxAggregateOutputType = {
     id: string | null
     contractId: string | null
+    chain: $Enums.Chain | null
     jobId: string | null
     status: $Enums.BuildStatus | null
     podName: string | null
@@ -6963,6 +7044,7 @@ export namespace Prisma {
   export type BuildJobCountAggregateOutputType = {
     id: number
     contractId: number
+    chain: number
     jobId: number
     status: number
     podName: number
@@ -6995,6 +7077,7 @@ export namespace Prisma {
   export type BuildJobMinAggregateInputType = {
     id?: true
     contractId?: true
+    chain?: true
     jobId?: true
     status?: true
     podName?: true
@@ -7012,6 +7095,7 @@ export namespace Prisma {
   export type BuildJobMaxAggregateInputType = {
     id?: true
     contractId?: true
+    chain?: true
     jobId?: true
     status?: true
     podName?: true
@@ -7029,6 +7113,7 @@ export namespace Prisma {
   export type BuildJobCountAggregateInputType = {
     id?: true
     contractId?: true
+    chain?: true
     jobId?: true
     status?: true
     podName?: true
@@ -7134,6 +7219,7 @@ export namespace Prisma {
   export type BuildJobGroupByOutputType = {
     id: string
     contractId: string
+    chain: $Enums.Chain
     jobId: string
     status: $Enums.BuildStatus
     podName: string | null
@@ -7171,6 +7257,7 @@ export namespace Prisma {
   export type BuildJobSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     contractId?: boolean
+    chain?: boolean
     jobId?: boolean
     status?: boolean
     podName?: boolean
@@ -7190,6 +7277,7 @@ export namespace Prisma {
   export type BuildJobSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     contractId?: boolean
+    chain?: boolean
     jobId?: boolean
     status?: boolean
     podName?: boolean
@@ -7209,6 +7297,7 @@ export namespace Prisma {
   export type BuildJobSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     contractId?: boolean
+    chain?: boolean
     jobId?: boolean
     status?: boolean
     podName?: boolean
@@ -7228,6 +7317,7 @@ export namespace Prisma {
   export type BuildJobSelectScalar = {
     id?: boolean
     contractId?: boolean
+    chain?: boolean
     jobId?: boolean
     status?: boolean
     podName?: boolean
@@ -7243,7 +7333,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type BuildJobOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "contractId" | "jobId" | "status" | "podName" | "command" | "startedAt" | "completedAt" | "duration" | "output" | "error" | "retryCount" | "maxRetry" | "createdAt" | "updatedAt", ExtArgs["result"]["buildJob"]>
+  export type BuildJobOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "contractId" | "chain" | "jobId" | "status" | "podName" | "command" | "startedAt" | "completedAt" | "duration" | "output" | "error" | "retryCount" | "maxRetry" | "createdAt" | "updatedAt", ExtArgs["result"]["buildJob"]>
   export type BuildJobInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     contract?: boolean | ContractDefaultArgs<ExtArgs>
   }
@@ -7262,6 +7352,7 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       contractId: string
+      chain: $Enums.Chain
       jobId: string
       status: $Enums.BuildStatus
       podName: string | null
@@ -7701,6 +7792,7 @@ export namespace Prisma {
   interface BuildJobFieldRefs {
     readonly id: FieldRef<"BuildJob", 'String'>
     readonly contractId: FieldRef<"BuildJob", 'String'>
+    readonly chain: FieldRef<"BuildJob", 'Chain'>
     readonly jobId: FieldRef<"BuildJob", 'String'>
     readonly status: FieldRef<"BuildJob", 'BuildStatus'>
     readonly podName: FieldRef<"BuildJob", 'String'>
@@ -8141,6 +8233,7 @@ export namespace Prisma {
   export type DeploymentMinAggregateOutputType = {
     id: string | null
     contractId: string | null
+    chain: $Enums.Chain | null
     network: string | null
     deployedAt: Date | null
     txSignature: string | null
@@ -8150,6 +8243,7 @@ export namespace Prisma {
   export type DeploymentMaxAggregateOutputType = {
     id: string | null
     contractId: string | null
+    chain: $Enums.Chain | null
     network: string | null
     deployedAt: Date | null
     txSignature: string | null
@@ -8159,10 +8253,12 @@ export namespace Prisma {
   export type DeploymentCountAggregateOutputType = {
     id: number
     contractId: number
+    chain: number
     network: number
     deployedAt: number
     txSignature: number
     status: number
+    metadata: number
     _all: number
   }
 
@@ -8170,6 +8266,7 @@ export namespace Prisma {
   export type DeploymentMinAggregateInputType = {
     id?: true
     contractId?: true
+    chain?: true
     network?: true
     deployedAt?: true
     txSignature?: true
@@ -8179,6 +8276,7 @@ export namespace Prisma {
   export type DeploymentMaxAggregateInputType = {
     id?: true
     contractId?: true
+    chain?: true
     network?: true
     deployedAt?: true
     txSignature?: true
@@ -8188,10 +8286,12 @@ export namespace Prisma {
   export type DeploymentCountAggregateInputType = {
     id?: true
     contractId?: true
+    chain?: true
     network?: true
     deployedAt?: true
     txSignature?: true
     status?: true
+    metadata?: true
     _all?: true
   }
 
@@ -8270,10 +8370,12 @@ export namespace Prisma {
   export type DeploymentGroupByOutputType = {
     id: string
     contractId: string
+    chain: $Enums.Chain
     network: string
     deployedAt: Date
     txSignature: string | null
     status: string
+    metadata: JsonValue | null
     _count: DeploymentCountAggregateOutputType | null
     _min: DeploymentMinAggregateOutputType | null
     _max: DeploymentMaxAggregateOutputType | null
@@ -8296,43 +8398,51 @@ export namespace Prisma {
   export type DeploymentSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     contractId?: boolean
+    chain?: boolean
     network?: boolean
     deployedAt?: boolean
     txSignature?: boolean
     status?: boolean
+    metadata?: boolean
     contract?: boolean | ContractDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["deployment"]>
 
   export type DeploymentSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     contractId?: boolean
+    chain?: boolean
     network?: boolean
     deployedAt?: boolean
     txSignature?: boolean
     status?: boolean
+    metadata?: boolean
     contract?: boolean | ContractDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["deployment"]>
 
   export type DeploymentSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     contractId?: boolean
+    chain?: boolean
     network?: boolean
     deployedAt?: boolean
     txSignature?: boolean
     status?: boolean
+    metadata?: boolean
     contract?: boolean | ContractDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["deployment"]>
 
   export type DeploymentSelectScalar = {
     id?: boolean
     contractId?: boolean
+    chain?: boolean
     network?: boolean
     deployedAt?: boolean
     txSignature?: boolean
     status?: boolean
+    metadata?: boolean
   }
 
-  export type DeploymentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "contractId" | "network" | "deployedAt" | "txSignature" | "status", ExtArgs["result"]["deployment"]>
+  export type DeploymentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "contractId" | "chain" | "network" | "deployedAt" | "txSignature" | "status" | "metadata", ExtArgs["result"]["deployment"]>
   export type DeploymentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     contract?: boolean | ContractDefaultArgs<ExtArgs>
   }
@@ -8351,10 +8461,12 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       contractId: string
+      chain: $Enums.Chain
       network: string
       deployedAt: Date
       txSignature: string | null
       status: string
+      metadata: Prisma.JsonValue | null
     }, ExtArgs["result"]["deployment"]>
     composites: {}
   }
@@ -8781,10 +8893,12 @@ export namespace Prisma {
   interface DeploymentFieldRefs {
     readonly id: FieldRef<"Deployment", 'String'>
     readonly contractId: FieldRef<"Deployment", 'String'>
+    readonly chain: FieldRef<"Deployment", 'Chain'>
     readonly network: FieldRef<"Deployment", 'String'>
     readonly deployedAt: FieldRef<"Deployment", 'DateTime'>
     readonly txSignature: FieldRef<"Deployment", 'String'>
     readonly status: FieldRef<"Deployment", 'String'>
+    readonly metadata: FieldRef<"Deployment", 'Json'>
   }
     
 
@@ -13765,6 +13879,7 @@ export namespace Prisma {
     title: 'title',
     description: 'description',
     contractType: 'contractType',
+    chain: 'chain',
     code: 'code',
     codeHash: 'codeHash',
     s3_url: 's3_url',
@@ -13803,10 +13918,14 @@ export namespace Prisma {
     title: 'title',
     description: 'description',
     category: 'category',
+    chain: 'chain',
     tags: 'tags',
     s3_prefix: 's3_prefix',
     solanaVersion: 'solanaVersion',
     anchorVersion: 'anchorVersion',
+    baseNetwork: 'baseNetwork',
+    frontendStack: 'frontendStack',
+    runtimeStack: 'runtimeStack',
     summarisedObject: 'summarisedObject',
     imageUrl: 'imageUrl',
     createdAt: 'createdAt',
@@ -13819,6 +13938,7 @@ export namespace Prisma {
   export const BuildJobScalarFieldEnum: {
     id: 'id',
     contractId: 'contractId',
+    chain: 'chain',
     jobId: 'jobId',
     status: 'status',
     podName: 'podName',
@@ -13840,10 +13960,12 @@ export namespace Prisma {
   export const DeploymentScalarFieldEnum: {
     id: 'id',
     contractId: 'contractId',
+    chain: 'chain',
     network: 'network',
     deployedAt: 'deployedAt',
     txSignature: 'txSignature',
-    status: 'status'
+    status: 'status',
+    metadata: 'metadata'
   };
 
   export type DeploymentScalarFieldEnum = (typeof DeploymentScalarFieldEnum)[keyof typeof DeploymentScalarFieldEnum]
@@ -13993,6 +14115,20 @@ export namespace Prisma {
    * Reference to a field of type 'ContractType[]'
    */
   export type ListEnumContractTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ContractType[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Chain'
+   */
+  export type EnumChainFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Chain'>
+    
+
+
+  /**
+   * Reference to a field of type 'Chain[]'
+   */
+  export type ListEnumChainFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Chain[]'>
     
 
 
@@ -14251,6 +14387,7 @@ export namespace Prisma {
     title?: StringFilter<"Contract"> | string
     description?: StringNullableFilter<"Contract"> | string | null
     contractType?: EnumContractTypeFilter<"Contract"> | $Enums.ContractType
+    chain?: EnumChainFilter<"Contract"> | $Enums.Chain
     code?: StringNullableFilter<"Contract"> | string | null
     codeHash?: StringNullableFilter<"Contract"> | string | null
     s3_url?: StringNullableFilter<"Contract"> | string | null
@@ -14279,6 +14416,7 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrderInput | SortOrder
     contractType?: SortOrder
+    chain?: SortOrder
     code?: SortOrderInput | SortOrder
     codeHash?: SortOrderInput | SortOrder
     s3_url?: SortOrderInput | SortOrder
@@ -14310,6 +14448,7 @@ export namespace Prisma {
     title?: StringFilter<"Contract"> | string
     description?: StringNullableFilter<"Contract"> | string | null
     contractType?: EnumContractTypeFilter<"Contract"> | $Enums.ContractType
+    chain?: EnumChainFilter<"Contract"> | $Enums.Chain
     code?: StringNullableFilter<"Contract"> | string | null
     codeHash?: StringNullableFilter<"Contract"> | string | null
     s3_url?: StringNullableFilter<"Contract"> | string | null
@@ -14338,6 +14477,7 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrderInput | SortOrder
     contractType?: SortOrder
+    chain?: SortOrder
     code?: SortOrderInput | SortOrder
     codeHash?: SortOrderInput | SortOrder
     s3_url?: SortOrderInput | SortOrder
@@ -14369,6 +14509,7 @@ export namespace Prisma {
     title?: StringWithAggregatesFilter<"Contract"> | string
     description?: StringNullableWithAggregatesFilter<"Contract"> | string | null
     contractType?: EnumContractTypeWithAggregatesFilter<"Contract"> | $Enums.ContractType
+    chain?: EnumChainWithAggregatesFilter<"Contract"> | $Enums.Chain
     code?: StringNullableWithAggregatesFilter<"Contract"> | string | null
     codeHash?: StringNullableWithAggregatesFilter<"Contract"> | string | null
     s3_url?: StringNullableWithAggregatesFilter<"Contract"> | string | null
@@ -14457,10 +14598,14 @@ export namespace Prisma {
     title?: StringFilter<"Template"> | string
     description?: StringNullableFilter<"Template"> | string | null
     category?: StringFilter<"Template"> | string
+    chain?: EnumChainFilter<"Template"> | $Enums.Chain
     tags?: StringNullableListFilter<"Template">
     s3_prefix?: StringNullableFilter<"Template"> | string | null
-    solanaVersion?: StringFilter<"Template"> | string
-    anchorVersion?: StringFilter<"Template"> | string
+    solanaVersion?: StringNullableFilter<"Template"> | string | null
+    anchorVersion?: StringNullableFilter<"Template"> | string | null
+    baseNetwork?: StringNullableFilter<"Template"> | string | null
+    frontendStack?: StringNullableFilter<"Template"> | string | null
+    runtimeStack?: StringNullableFilter<"Template"> | string | null
     summarisedObject?: StringFilter<"Template"> | string
     imageUrl?: StringFilter<"Template"> | string
     createdAt?: DateTimeFilter<"Template"> | Date | string
@@ -14473,10 +14618,14 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrderInput | SortOrder
     category?: SortOrder
+    chain?: SortOrder
     tags?: SortOrder
     s3_prefix?: SortOrderInput | SortOrder
-    solanaVersion?: SortOrder
-    anchorVersion?: SortOrder
+    solanaVersion?: SortOrderInput | SortOrder
+    anchorVersion?: SortOrderInput | SortOrder
+    baseNetwork?: SortOrderInput | SortOrder
+    frontendStack?: SortOrderInput | SortOrder
+    runtimeStack?: SortOrderInput | SortOrder
     summarisedObject?: SortOrder
     imageUrl?: SortOrder
     createdAt?: SortOrder
@@ -14492,10 +14641,14 @@ export namespace Prisma {
     title?: StringFilter<"Template"> | string
     description?: StringNullableFilter<"Template"> | string | null
     category?: StringFilter<"Template"> | string
+    chain?: EnumChainFilter<"Template"> | $Enums.Chain
     tags?: StringNullableListFilter<"Template">
     s3_prefix?: StringNullableFilter<"Template"> | string | null
-    solanaVersion?: StringFilter<"Template"> | string
-    anchorVersion?: StringFilter<"Template"> | string
+    solanaVersion?: StringNullableFilter<"Template"> | string | null
+    anchorVersion?: StringNullableFilter<"Template"> | string | null
+    baseNetwork?: StringNullableFilter<"Template"> | string | null
+    frontendStack?: StringNullableFilter<"Template"> | string | null
+    runtimeStack?: StringNullableFilter<"Template"> | string | null
     summarisedObject?: StringFilter<"Template"> | string
     imageUrl?: StringFilter<"Template"> | string
     createdAt?: DateTimeFilter<"Template"> | Date | string
@@ -14508,10 +14661,14 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrderInput | SortOrder
     category?: SortOrder
+    chain?: SortOrder
     tags?: SortOrder
     s3_prefix?: SortOrderInput | SortOrder
-    solanaVersion?: SortOrder
-    anchorVersion?: SortOrder
+    solanaVersion?: SortOrderInput | SortOrder
+    anchorVersion?: SortOrderInput | SortOrder
+    baseNetwork?: SortOrderInput | SortOrder
+    frontendStack?: SortOrderInput | SortOrder
+    runtimeStack?: SortOrderInput | SortOrder
     summarisedObject?: SortOrder
     imageUrl?: SortOrder
     createdAt?: SortOrder
@@ -14529,10 +14686,14 @@ export namespace Prisma {
     title?: StringWithAggregatesFilter<"Template"> | string
     description?: StringNullableWithAggregatesFilter<"Template"> | string | null
     category?: StringWithAggregatesFilter<"Template"> | string
+    chain?: EnumChainWithAggregatesFilter<"Template"> | $Enums.Chain
     tags?: StringNullableListFilter<"Template">
     s3_prefix?: StringNullableWithAggregatesFilter<"Template"> | string | null
-    solanaVersion?: StringWithAggregatesFilter<"Template"> | string
-    anchorVersion?: StringWithAggregatesFilter<"Template"> | string
+    solanaVersion?: StringNullableWithAggregatesFilter<"Template"> | string | null
+    anchorVersion?: StringNullableWithAggregatesFilter<"Template"> | string | null
+    baseNetwork?: StringNullableWithAggregatesFilter<"Template"> | string | null
+    frontendStack?: StringNullableWithAggregatesFilter<"Template"> | string | null
+    runtimeStack?: StringNullableWithAggregatesFilter<"Template"> | string | null
     summarisedObject?: StringWithAggregatesFilter<"Template"> | string
     imageUrl?: StringWithAggregatesFilter<"Template"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Template"> | Date | string
@@ -14545,6 +14706,7 @@ export namespace Prisma {
     NOT?: BuildJobWhereInput | BuildJobWhereInput[]
     id?: StringFilter<"BuildJob"> | string
     contractId?: StringFilter<"BuildJob"> | string
+    chain?: EnumChainFilter<"BuildJob"> | $Enums.Chain
     jobId?: StringFilter<"BuildJob"> | string
     status?: EnumBuildStatusFilter<"BuildJob"> | $Enums.BuildStatus
     podName?: StringNullableFilter<"BuildJob"> | string | null
@@ -14564,6 +14726,7 @@ export namespace Prisma {
   export type BuildJobOrderByWithRelationInput = {
     id?: SortOrder
     contractId?: SortOrder
+    chain?: SortOrder
     jobId?: SortOrder
     status?: SortOrder
     podName?: SortOrderInput | SortOrder
@@ -14586,6 +14749,7 @@ export namespace Prisma {
     OR?: BuildJobWhereInput[]
     NOT?: BuildJobWhereInput | BuildJobWhereInput[]
     contractId?: StringFilter<"BuildJob"> | string
+    chain?: EnumChainFilter<"BuildJob"> | $Enums.Chain
     jobId?: StringFilter<"BuildJob"> | string
     status?: EnumBuildStatusFilter<"BuildJob"> | $Enums.BuildStatus
     podName?: StringNullableFilter<"BuildJob"> | string | null
@@ -14605,6 +14769,7 @@ export namespace Prisma {
   export type BuildJobOrderByWithAggregationInput = {
     id?: SortOrder
     contractId?: SortOrder
+    chain?: SortOrder
     jobId?: SortOrder
     status?: SortOrder
     podName?: SortOrderInput | SortOrder
@@ -14631,6 +14796,7 @@ export namespace Prisma {
     NOT?: BuildJobScalarWhereWithAggregatesInput | BuildJobScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"BuildJob"> | string
     contractId?: StringWithAggregatesFilter<"BuildJob"> | string
+    chain?: EnumChainWithAggregatesFilter<"BuildJob"> | $Enums.Chain
     jobId?: StringWithAggregatesFilter<"BuildJob"> | string
     status?: EnumBuildStatusWithAggregatesFilter<"BuildJob"> | $Enums.BuildStatus
     podName?: StringNullableWithAggregatesFilter<"BuildJob"> | string | null
@@ -14652,20 +14818,24 @@ export namespace Prisma {
     NOT?: DeploymentWhereInput | DeploymentWhereInput[]
     id?: StringFilter<"Deployment"> | string
     contractId?: StringFilter<"Deployment"> | string
+    chain?: EnumChainFilter<"Deployment"> | $Enums.Chain
     network?: StringFilter<"Deployment"> | string
     deployedAt?: DateTimeFilter<"Deployment"> | Date | string
     txSignature?: StringNullableFilter<"Deployment"> | string | null
     status?: StringFilter<"Deployment"> | string
+    metadata?: JsonNullableFilter<"Deployment">
     contract?: XOR<ContractScalarRelationFilter, ContractWhereInput>
   }
 
   export type DeploymentOrderByWithRelationInput = {
     id?: SortOrder
     contractId?: SortOrder
+    chain?: SortOrder
     network?: SortOrder
     deployedAt?: SortOrder
     txSignature?: SortOrderInput | SortOrder
     status?: SortOrder
+    metadata?: SortOrderInput | SortOrder
     contract?: ContractOrderByWithRelationInput
   }
 
@@ -14675,20 +14845,24 @@ export namespace Prisma {
     OR?: DeploymentWhereInput[]
     NOT?: DeploymentWhereInput | DeploymentWhereInput[]
     contractId?: StringFilter<"Deployment"> | string
+    chain?: EnumChainFilter<"Deployment"> | $Enums.Chain
     network?: StringFilter<"Deployment"> | string
     deployedAt?: DateTimeFilter<"Deployment"> | Date | string
     txSignature?: StringNullableFilter<"Deployment"> | string | null
     status?: StringFilter<"Deployment"> | string
+    metadata?: JsonNullableFilter<"Deployment">
     contract?: XOR<ContractScalarRelationFilter, ContractWhereInput>
   }, "id">
 
   export type DeploymentOrderByWithAggregationInput = {
     id?: SortOrder
     contractId?: SortOrder
+    chain?: SortOrder
     network?: SortOrder
     deployedAt?: SortOrder
     txSignature?: SortOrderInput | SortOrder
     status?: SortOrder
+    metadata?: SortOrderInput | SortOrder
     _count?: DeploymentCountOrderByAggregateInput
     _max?: DeploymentMaxOrderByAggregateInput
     _min?: DeploymentMinOrderByAggregateInput
@@ -14700,10 +14874,12 @@ export namespace Prisma {
     NOT?: DeploymentScalarWhereWithAggregatesInput | DeploymentScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Deployment"> | string
     contractId?: StringWithAggregatesFilter<"Deployment"> | string
+    chain?: EnumChainWithAggregatesFilter<"Deployment"> | $Enums.Chain
     network?: StringWithAggregatesFilter<"Deployment"> | string
     deployedAt?: DateTimeWithAggregatesFilter<"Deployment"> | Date | string
     txSignature?: StringNullableWithAggregatesFilter<"Deployment"> | string | null
     status?: StringWithAggregatesFilter<"Deployment"> | string
+    metadata?: JsonNullableWithAggregatesFilter<"Deployment">
   }
 
   export type MessageWhereInput = {
@@ -15134,6 +15310,7 @@ export namespace Prisma {
     title: string
     description?: string | null
     contractType: $Enums.ContractType
+    chain?: $Enums.Chain
     code?: string | null
     codeHash?: string | null
     s3_url?: string | null
@@ -15161,6 +15338,7 @@ export namespace Prisma {
     title: string
     description?: string | null
     contractType: $Enums.ContractType
+    chain?: $Enums.Chain
     code?: string | null
     codeHash?: string | null
     s3_url?: string | null
@@ -15188,6 +15366,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     contractType?: EnumContractTypeFieldUpdateOperationsInput | $Enums.ContractType
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     code?: NullableStringFieldUpdateOperationsInput | string | null
     codeHash?: NullableStringFieldUpdateOperationsInput | string | null
     s3_url?: NullableStringFieldUpdateOperationsInput | string | null
@@ -15215,6 +15394,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     contractType?: EnumContractTypeFieldUpdateOperationsInput | $Enums.ContractType
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     code?: NullableStringFieldUpdateOperationsInput | string | null
     codeHash?: NullableStringFieldUpdateOperationsInput | string | null
     s3_url?: NullableStringFieldUpdateOperationsInput | string | null
@@ -15242,6 +15422,7 @@ export namespace Prisma {
     title: string
     description?: string | null
     contractType: $Enums.ContractType
+    chain?: $Enums.Chain
     code?: string | null
     codeHash?: string | null
     s3_url?: string | null
@@ -15265,6 +15446,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     contractType?: EnumContractTypeFieldUpdateOperationsInput | $Enums.ContractType
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     code?: NullableStringFieldUpdateOperationsInput | string | null
     codeHash?: NullableStringFieldUpdateOperationsInput | string | null
     s3_url?: NullableStringFieldUpdateOperationsInput | string | null
@@ -15287,6 +15469,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     contractType?: EnumContractTypeFieldUpdateOperationsInput | $Enums.ContractType
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     code?: NullableStringFieldUpdateOperationsInput | string | null
     codeHash?: NullableStringFieldUpdateOperationsInput | string | null
     s3_url?: NullableStringFieldUpdateOperationsInput | string | null
@@ -15372,10 +15555,14 @@ export namespace Prisma {
     title: string
     description?: string | null
     category: string
+    chain?: $Enums.Chain
     tags?: TemplateCreatetagsInput | string[]
     s3_prefix?: string | null
-    solanaVersion: string
-    anchorVersion: string
+    solanaVersion?: string | null
+    anchorVersion?: string | null
+    baseNetwork?: string | null
+    frontendStack?: string | null
+    runtimeStack?: string | null
     summarisedObject: string
     imageUrl: string
     createdAt?: Date | string
@@ -15388,10 +15575,14 @@ export namespace Prisma {
     title: string
     description?: string | null
     category: string
+    chain?: $Enums.Chain
     tags?: TemplateCreatetagsInput | string[]
     s3_prefix?: string | null
-    solanaVersion: string
-    anchorVersion: string
+    solanaVersion?: string | null
+    anchorVersion?: string | null
+    baseNetwork?: string | null
+    frontendStack?: string | null
+    runtimeStack?: string | null
     summarisedObject: string
     imageUrl: string
     createdAt?: Date | string
@@ -15404,10 +15595,14 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     category?: StringFieldUpdateOperationsInput | string
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     tags?: TemplateUpdatetagsInput | string[]
     s3_prefix?: NullableStringFieldUpdateOperationsInput | string | null
-    solanaVersion?: StringFieldUpdateOperationsInput | string
-    anchorVersion?: StringFieldUpdateOperationsInput | string
+    solanaVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    anchorVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    baseNetwork?: NullableStringFieldUpdateOperationsInput | string | null
+    frontendStack?: NullableStringFieldUpdateOperationsInput | string | null
+    runtimeStack?: NullableStringFieldUpdateOperationsInput | string | null
     summarisedObject?: StringFieldUpdateOperationsInput | string
     imageUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15420,10 +15615,14 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     category?: StringFieldUpdateOperationsInput | string
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     tags?: TemplateUpdatetagsInput | string[]
     s3_prefix?: NullableStringFieldUpdateOperationsInput | string | null
-    solanaVersion?: StringFieldUpdateOperationsInput | string
-    anchorVersion?: StringFieldUpdateOperationsInput | string
+    solanaVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    anchorVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    baseNetwork?: NullableStringFieldUpdateOperationsInput | string | null
+    frontendStack?: NullableStringFieldUpdateOperationsInput | string | null
+    runtimeStack?: NullableStringFieldUpdateOperationsInput | string | null
     summarisedObject?: StringFieldUpdateOperationsInput | string
     imageUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15436,10 +15635,14 @@ export namespace Prisma {
     title: string
     description?: string | null
     category: string
+    chain?: $Enums.Chain
     tags?: TemplateCreatetagsInput | string[]
     s3_prefix?: string | null
-    solanaVersion: string
-    anchorVersion: string
+    solanaVersion?: string | null
+    anchorVersion?: string | null
+    baseNetwork?: string | null
+    frontendStack?: string | null
+    runtimeStack?: string | null
     summarisedObject: string
     imageUrl: string
     createdAt?: Date | string
@@ -15451,10 +15654,14 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     category?: StringFieldUpdateOperationsInput | string
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     tags?: TemplateUpdatetagsInput | string[]
     s3_prefix?: NullableStringFieldUpdateOperationsInput | string | null
-    solanaVersion?: StringFieldUpdateOperationsInput | string
-    anchorVersion?: StringFieldUpdateOperationsInput | string
+    solanaVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    anchorVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    baseNetwork?: NullableStringFieldUpdateOperationsInput | string | null
+    frontendStack?: NullableStringFieldUpdateOperationsInput | string | null
+    runtimeStack?: NullableStringFieldUpdateOperationsInput | string | null
     summarisedObject?: StringFieldUpdateOperationsInput | string
     imageUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15466,10 +15673,14 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     category?: StringFieldUpdateOperationsInput | string
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     tags?: TemplateUpdatetagsInput | string[]
     s3_prefix?: NullableStringFieldUpdateOperationsInput | string | null
-    solanaVersion?: StringFieldUpdateOperationsInput | string
-    anchorVersion?: StringFieldUpdateOperationsInput | string
+    solanaVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    anchorVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    baseNetwork?: NullableStringFieldUpdateOperationsInput | string | null
+    frontendStack?: NullableStringFieldUpdateOperationsInput | string | null
+    runtimeStack?: NullableStringFieldUpdateOperationsInput | string | null
     summarisedObject?: StringFieldUpdateOperationsInput | string
     imageUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15478,6 +15689,7 @@ export namespace Prisma {
 
   export type BuildJobCreateInput = {
     id?: string
+    chain?: $Enums.Chain
     jobId: string
     status: $Enums.BuildStatus
     podName?: string | null
@@ -15497,6 +15709,7 @@ export namespace Prisma {
   export type BuildJobUncheckedCreateInput = {
     id?: string
     contractId: string
+    chain?: $Enums.Chain
     jobId: string
     status: $Enums.BuildStatus
     podName?: string | null
@@ -15514,6 +15727,7 @@ export namespace Prisma {
 
   export type BuildJobUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     jobId?: StringFieldUpdateOperationsInput | string
     status?: EnumBuildStatusFieldUpdateOperationsInput | $Enums.BuildStatus
     podName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -15533,6 +15747,7 @@ export namespace Prisma {
   export type BuildJobUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     contractId?: StringFieldUpdateOperationsInput | string
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     jobId?: StringFieldUpdateOperationsInput | string
     status?: EnumBuildStatusFieldUpdateOperationsInput | $Enums.BuildStatus
     podName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -15551,6 +15766,7 @@ export namespace Prisma {
   export type BuildJobCreateManyInput = {
     id?: string
     contractId: string
+    chain?: $Enums.Chain
     jobId: string
     status: $Enums.BuildStatus
     podName?: string | null
@@ -15568,6 +15784,7 @@ export namespace Prisma {
 
   export type BuildJobUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     jobId?: StringFieldUpdateOperationsInput | string
     status?: EnumBuildStatusFieldUpdateOperationsInput | $Enums.BuildStatus
     podName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -15586,6 +15803,7 @@ export namespace Prisma {
   export type BuildJobUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     contractId?: StringFieldUpdateOperationsInput | string
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     jobId?: StringFieldUpdateOperationsInput | string
     status?: EnumBuildStatusFieldUpdateOperationsInput | $Enums.BuildStatus
     podName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -15603,64 +15821,78 @@ export namespace Prisma {
 
   export type DeploymentCreateInput = {
     id?: string
+    chain?: $Enums.Chain
     network: string
     deployedAt?: Date | string
     txSignature?: string | null
     status: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     contract: ContractCreateNestedOneWithoutDeploymentsInput
   }
 
   export type DeploymentUncheckedCreateInput = {
     id?: string
     contractId: string
+    chain?: $Enums.Chain
     network: string
     deployedAt?: Date | string
     txSignature?: string | null
     status: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type DeploymentUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     network?: StringFieldUpdateOperationsInput | string
     deployedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     txSignature?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     contract?: ContractUpdateOneRequiredWithoutDeploymentsNestedInput
   }
 
   export type DeploymentUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     contractId?: StringFieldUpdateOperationsInput | string
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     network?: StringFieldUpdateOperationsInput | string
     deployedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     txSignature?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type DeploymentCreateManyInput = {
     id?: string
     contractId: string
+    chain?: $Enums.Chain
     network: string
     deployedAt?: Date | string
     txSignature?: string | null
     status: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type DeploymentUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     network?: StringFieldUpdateOperationsInput | string
     deployedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     txSignature?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type DeploymentUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     contractId?: StringFieldUpdateOperationsInput | string
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     network?: StringFieldUpdateOperationsInput | string
     deployedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     txSignature?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type MessageCreateInput = {
@@ -16176,6 +16408,13 @@ export namespace Prisma {
     not?: NestedEnumContractTypeFilter<$PrismaModel> | $Enums.ContractType
   }
 
+  export type EnumChainFilter<$PrismaModel = never> = {
+    equals?: $Enums.Chain | EnumChainFieldRefInput<$PrismaModel>
+    in?: $Enums.Chain[] | ListEnumChainFieldRefInput<$PrismaModel>
+    notIn?: $Enums.Chain[] | ListEnumChainFieldRefInput<$PrismaModel>
+    not?: NestedEnumChainFilter<$PrismaModel> | $Enums.Chain
+  }
+
   export type EnumBuildStatusNullableFilter<$PrismaModel = never> = {
     equals?: $Enums.BuildStatus | EnumBuildStatusFieldRefInput<$PrismaModel> | null
     in?: $Enums.BuildStatus[] | ListEnumBuildStatusFieldRefInput<$PrismaModel> | null
@@ -16269,6 +16508,7 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     contractType?: SortOrder
+    chain?: SortOrder
     code?: SortOrder
     codeHash?: SortOrder
     s3_url?: SortOrder
@@ -16296,6 +16536,7 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     contractType?: SortOrder
+    chain?: SortOrder
     code?: SortOrder
     codeHash?: SortOrder
     s3_url?: SortOrder
@@ -16317,6 +16558,7 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     contractType?: SortOrder
+    chain?: SortOrder
     code?: SortOrder
     codeHash?: SortOrder
     s3_url?: SortOrder
@@ -16345,6 +16587,16 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumContractTypeFilter<$PrismaModel>
     _max?: NestedEnumContractTypeFilter<$PrismaModel>
+  }
+
+  export type EnumChainWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.Chain | EnumChainFieldRefInput<$PrismaModel>
+    in?: $Enums.Chain[] | ListEnumChainFieldRefInput<$PrismaModel>
+    notIn?: $Enums.Chain[] | ListEnumChainFieldRefInput<$PrismaModel>
+    not?: NestedEnumChainWithAggregatesFilter<$PrismaModel> | $Enums.Chain
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumChainFilter<$PrismaModel>
+    _max?: NestedEnumChainFilter<$PrismaModel>
   }
 
   export type EnumBuildStatusNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -16465,10 +16717,14 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     category?: SortOrder
+    chain?: SortOrder
     tags?: SortOrder
     s3_prefix?: SortOrder
     solanaVersion?: SortOrder
     anchorVersion?: SortOrder
+    baseNetwork?: SortOrder
+    frontendStack?: SortOrder
+    runtimeStack?: SortOrder
     summarisedObject?: SortOrder
     imageUrl?: SortOrder
     createdAt?: SortOrder
@@ -16480,9 +16736,13 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     category?: SortOrder
+    chain?: SortOrder
     s3_prefix?: SortOrder
     solanaVersion?: SortOrder
     anchorVersion?: SortOrder
+    baseNetwork?: SortOrder
+    frontendStack?: SortOrder
+    runtimeStack?: SortOrder
     summarisedObject?: SortOrder
     imageUrl?: SortOrder
     createdAt?: SortOrder
@@ -16494,9 +16754,13 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     category?: SortOrder
+    chain?: SortOrder
     s3_prefix?: SortOrder
     solanaVersion?: SortOrder
     anchorVersion?: SortOrder
+    baseNetwork?: SortOrder
+    frontendStack?: SortOrder
+    runtimeStack?: SortOrder
     summarisedObject?: SortOrder
     imageUrl?: SortOrder
     createdAt?: SortOrder
@@ -16547,6 +16811,7 @@ export namespace Prisma {
   export type BuildJobCountOrderByAggregateInput = {
     id?: SortOrder
     contractId?: SortOrder
+    chain?: SortOrder
     jobId?: SortOrder
     status?: SortOrder
     podName?: SortOrder
@@ -16571,6 +16836,7 @@ export namespace Prisma {
   export type BuildJobMaxOrderByAggregateInput = {
     id?: SortOrder
     contractId?: SortOrder
+    chain?: SortOrder
     jobId?: SortOrder
     status?: SortOrder
     podName?: SortOrder
@@ -16588,6 +16854,7 @@ export namespace Prisma {
   export type BuildJobMinOrderByAggregateInput = {
     id?: SortOrder
     contractId?: SortOrder
+    chain?: SortOrder
     jobId?: SortOrder
     status?: SortOrder
     podName?: SortOrder
@@ -16661,15 +16928,18 @@ export namespace Prisma {
   export type DeploymentCountOrderByAggregateInput = {
     id?: SortOrder
     contractId?: SortOrder
+    chain?: SortOrder
     network?: SortOrder
     deployedAt?: SortOrder
     txSignature?: SortOrder
     status?: SortOrder
+    metadata?: SortOrder
   }
 
   export type DeploymentMaxOrderByAggregateInput = {
     id?: SortOrder
     contractId?: SortOrder
+    chain?: SortOrder
     network?: SortOrder
     deployedAt?: SortOrder
     txSignature?: SortOrder
@@ -16679,6 +16949,7 @@ export namespace Prisma {
   export type DeploymentMinOrderByAggregateInput = {
     id?: SortOrder
     contractId?: SortOrder
+    chain?: SortOrder
     network?: SortOrder
     deployedAt?: SortOrder
     txSignature?: SortOrder
@@ -17193,6 +17464,10 @@ export namespace Prisma {
     set?: $Enums.ContractType
   }
 
+  export type EnumChainFieldUpdateOperationsInput = {
+    set?: $Enums.Chain
+  }
+
   export type NullableEnumBuildStatusFieldUpdateOperationsInput = {
     set?: $Enums.BuildStatus | null
   }
@@ -17664,6 +17939,13 @@ export namespace Prisma {
     not?: NestedEnumContractTypeFilter<$PrismaModel> | $Enums.ContractType
   }
 
+  export type NestedEnumChainFilter<$PrismaModel = never> = {
+    equals?: $Enums.Chain | EnumChainFieldRefInput<$PrismaModel>
+    in?: $Enums.Chain[] | ListEnumChainFieldRefInput<$PrismaModel>
+    notIn?: $Enums.Chain[] | ListEnumChainFieldRefInput<$PrismaModel>
+    not?: NestedEnumChainFilter<$PrismaModel> | $Enums.Chain
+  }
+
   export type NestedEnumBuildStatusNullableFilter<$PrismaModel = never> = {
     equals?: $Enums.BuildStatus | EnumBuildStatusFieldRefInput<$PrismaModel> | null
     in?: $Enums.BuildStatus[] | ListEnumBuildStatusFieldRefInput<$PrismaModel> | null
@@ -17691,6 +17973,16 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumContractTypeFilter<$PrismaModel>
     _max?: NestedEnumContractTypeFilter<$PrismaModel>
+  }
+
+  export type NestedEnumChainWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.Chain | EnumChainFieldRefInput<$PrismaModel>
+    in?: $Enums.Chain[] | ListEnumChainFieldRefInput<$PrismaModel>
+    notIn?: $Enums.Chain[] | ListEnumChainFieldRefInput<$PrismaModel>
+    not?: NestedEnumChainWithAggregatesFilter<$PrismaModel> | $Enums.Chain
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumChainFilter<$PrismaModel>
+    _max?: NestedEnumChainFilter<$PrismaModel>
   }
 
   export type NestedEnumBuildStatusNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -17963,6 +18255,7 @@ export namespace Prisma {
     title: string
     description?: string | null
     contractType: $Enums.ContractType
+    chain?: $Enums.Chain
     code?: string | null
     codeHash?: string | null
     s3_url?: string | null
@@ -17989,6 +18282,7 @@ export namespace Prisma {
     title: string
     description?: string | null
     contractType: $Enums.ContractType
+    chain?: $Enums.Chain
     code?: string | null
     codeHash?: string | null
     s3_url?: string | null
@@ -18165,6 +18459,7 @@ export namespace Prisma {
     title?: StringFilter<"Contract"> | string
     description?: StringNullableFilter<"Contract"> | string | null
     contractType?: EnumContractTypeFilter<"Contract"> | $Enums.ContractType
+    chain?: EnumChainFilter<"Contract"> | $Enums.Chain
     code?: StringNullableFilter<"Contract"> | string | null
     codeHash?: StringNullableFilter<"Contract"> | string | null
     s3_url?: StringNullableFilter<"Contract"> | string | null
@@ -18312,18 +18607,22 @@ export namespace Prisma {
 
   export type DeploymentCreateWithoutContractInput = {
     id?: string
+    chain?: $Enums.Chain
     network: string
     deployedAt?: Date | string
     txSignature?: string | null
     status: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type DeploymentUncheckedCreateWithoutContractInput = {
     id?: string
+    chain?: $Enums.Chain
     network: string
     deployedAt?: Date | string
     txSignature?: string | null
     status: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type DeploymentCreateOrConnectWithoutContractInput = {
@@ -18338,6 +18637,7 @@ export namespace Prisma {
 
   export type BuildJobCreateWithoutContractInput = {
     id?: string
+    chain?: $Enums.Chain
     jobId: string
     status: $Enums.BuildStatus
     podName?: string | null
@@ -18355,6 +18655,7 @@ export namespace Prisma {
 
   export type BuildJobUncheckedCreateWithoutContractInput = {
     id?: string
+    chain?: $Enums.Chain
     jobId: string
     status: $Enums.BuildStatus
     podName?: string | null
@@ -18509,10 +18810,12 @@ export namespace Prisma {
     NOT?: DeploymentScalarWhereInput | DeploymentScalarWhereInput[]
     id?: StringFilter<"Deployment"> | string
     contractId?: StringFilter<"Deployment"> | string
+    chain?: EnumChainFilter<"Deployment"> | $Enums.Chain
     network?: StringFilter<"Deployment"> | string
     deployedAt?: DateTimeFilter<"Deployment"> | Date | string
     txSignature?: StringNullableFilter<"Deployment"> | string | null
     status?: StringFilter<"Deployment"> | string
+    metadata?: JsonNullableFilter<"Deployment">
   }
 
   export type BuildJobUpsertWithWhereUniqueWithoutContractInput = {
@@ -18537,6 +18840,7 @@ export namespace Prisma {
     NOT?: BuildJobScalarWhereInput | BuildJobScalarWhereInput[]
     id?: StringFilter<"BuildJob"> | string
     contractId?: StringFilter<"BuildJob"> | string
+    chain?: EnumChainFilter<"BuildJob"> | $Enums.Chain
     jobId?: StringFilter<"BuildJob"> | string
     status?: EnumBuildStatusFilter<"BuildJob"> | $Enums.BuildStatus
     podName?: StringNullableFilter<"BuildJob"> | string | null
@@ -18740,6 +19044,7 @@ export namespace Prisma {
     title: string
     description?: string | null
     contractType: $Enums.ContractType
+    chain?: $Enums.Chain
     code?: string | null
     codeHash?: string | null
     s3_url?: string | null
@@ -18766,6 +19071,7 @@ export namespace Prisma {
     title: string
     description?: string | null
     contractType: $Enums.ContractType
+    chain?: $Enums.Chain
     code?: string | null
     codeHash?: string | null
     s3_url?: string | null
@@ -18808,6 +19114,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     contractType?: EnumContractTypeFieldUpdateOperationsInput | $Enums.ContractType
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     code?: NullableStringFieldUpdateOperationsInput | string | null
     codeHash?: NullableStringFieldUpdateOperationsInput | string | null
     s3_url?: NullableStringFieldUpdateOperationsInput | string | null
@@ -18834,6 +19141,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     contractType?: EnumContractTypeFieldUpdateOperationsInput | $Enums.ContractType
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     code?: NullableStringFieldUpdateOperationsInput | string | null
     codeHash?: NullableStringFieldUpdateOperationsInput | string | null
     s3_url?: NullableStringFieldUpdateOperationsInput | string | null
@@ -18860,6 +19168,7 @@ export namespace Prisma {
     title: string
     description?: string | null
     contractType: $Enums.ContractType
+    chain?: $Enums.Chain
     code?: string | null
     codeHash?: string | null
     s3_url?: string | null
@@ -18886,6 +19195,7 @@ export namespace Prisma {
     title: string
     description?: string | null
     contractType: $Enums.ContractType
+    chain?: $Enums.Chain
     code?: string | null
     codeHash?: string | null
     s3_url?: string | null
@@ -18928,6 +19238,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     contractType?: EnumContractTypeFieldUpdateOperationsInput | $Enums.ContractType
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     code?: NullableStringFieldUpdateOperationsInput | string | null
     codeHash?: NullableStringFieldUpdateOperationsInput | string | null
     s3_url?: NullableStringFieldUpdateOperationsInput | string | null
@@ -18954,6 +19265,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     contractType?: EnumContractTypeFieldUpdateOperationsInput | $Enums.ContractType
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     code?: NullableStringFieldUpdateOperationsInput | string | null
     codeHash?: NullableStringFieldUpdateOperationsInput | string | null
     s3_url?: NullableStringFieldUpdateOperationsInput | string | null
@@ -18980,6 +19292,7 @@ export namespace Prisma {
     title: string
     description?: string | null
     contractType: $Enums.ContractType
+    chain?: $Enums.Chain
     code?: string | null
     codeHash?: string | null
     s3_url?: string | null
@@ -19006,6 +19319,7 @@ export namespace Prisma {
     title: string
     description?: string | null
     contractType: $Enums.ContractType
+    chain?: $Enums.Chain
     code?: string | null
     codeHash?: string | null
     s3_url?: string | null
@@ -19037,10 +19351,14 @@ export namespace Prisma {
     title: string
     description?: string | null
     category: string
+    chain?: $Enums.Chain
     tags?: TemplateCreatetagsInput | string[]
     s3_prefix?: string | null
-    solanaVersion: string
-    anchorVersion: string
+    solanaVersion?: string | null
+    anchorVersion?: string | null
+    baseNetwork?: string | null
+    frontendStack?: string | null
+    runtimeStack?: string | null
     summarisedObject: string
     imageUrl: string
     createdAt?: Date | string
@@ -19052,10 +19370,14 @@ export namespace Prisma {
     title: string
     description?: string | null
     category: string
+    chain?: $Enums.Chain
     tags?: TemplateCreatetagsInput | string[]
     s3_prefix?: string | null
-    solanaVersion: string
-    anchorVersion: string
+    solanaVersion?: string | null
+    anchorVersion?: string | null
+    baseNetwork?: string | null
+    frontendStack?: string | null
+    runtimeStack?: string | null
     summarisedObject: string
     imageUrl: string
     createdAt?: Date | string
@@ -19083,6 +19405,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     contractType?: EnumContractTypeFieldUpdateOperationsInput | $Enums.ContractType
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     code?: NullableStringFieldUpdateOperationsInput | string | null
     codeHash?: NullableStringFieldUpdateOperationsInput | string | null
     s3_url?: NullableStringFieldUpdateOperationsInput | string | null
@@ -19109,6 +19432,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     contractType?: EnumContractTypeFieldUpdateOperationsInput | $Enums.ContractType
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     code?: NullableStringFieldUpdateOperationsInput | string | null
     codeHash?: NullableStringFieldUpdateOperationsInput | string | null
     s3_url?: NullableStringFieldUpdateOperationsInput | string | null
@@ -19146,10 +19470,14 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     category?: StringFieldUpdateOperationsInput | string
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     tags?: TemplateUpdatetagsInput | string[]
     s3_prefix?: NullableStringFieldUpdateOperationsInput | string | null
-    solanaVersion?: StringFieldUpdateOperationsInput | string
-    anchorVersion?: StringFieldUpdateOperationsInput | string
+    solanaVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    anchorVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    baseNetwork?: NullableStringFieldUpdateOperationsInput | string | null
+    frontendStack?: NullableStringFieldUpdateOperationsInput | string | null
+    runtimeStack?: NullableStringFieldUpdateOperationsInput | string | null
     summarisedObject?: StringFieldUpdateOperationsInput | string
     imageUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -19161,10 +19489,14 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     category?: StringFieldUpdateOperationsInput | string
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     tags?: TemplateUpdatetagsInput | string[]
     s3_prefix?: NullableStringFieldUpdateOperationsInput | string | null
-    solanaVersion?: StringFieldUpdateOperationsInput | string
-    anchorVersion?: StringFieldUpdateOperationsInput | string
+    solanaVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    anchorVersion?: NullableStringFieldUpdateOperationsInput | string | null
+    baseNetwork?: NullableStringFieldUpdateOperationsInput | string | null
+    frontendStack?: NullableStringFieldUpdateOperationsInput | string | null
+    runtimeStack?: NullableStringFieldUpdateOperationsInput | string | null
     summarisedObject?: StringFieldUpdateOperationsInput | string
     imageUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -19264,6 +19596,7 @@ export namespace Prisma {
     title: string
     description?: string | null
     contractType: $Enums.ContractType
+    chain?: $Enums.Chain
     code?: string | null
     codeHash?: string | null
     s3_url?: string | null
@@ -19290,6 +19623,7 @@ export namespace Prisma {
     title: string
     description?: string | null
     contractType: $Enums.ContractType
+    chain?: $Enums.Chain
     code?: string | null
     codeHash?: string | null
     s3_url?: string | null
@@ -19373,6 +19707,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     contractType?: EnumContractTypeFieldUpdateOperationsInput | $Enums.ContractType
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     code?: NullableStringFieldUpdateOperationsInput | string | null
     codeHash?: NullableStringFieldUpdateOperationsInput | string | null
     s3_url?: NullableStringFieldUpdateOperationsInput | string | null
@@ -19399,6 +19734,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     contractType?: EnumContractTypeFieldUpdateOperationsInput | $Enums.ContractType
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     code?: NullableStringFieldUpdateOperationsInput | string | null
     codeHash?: NullableStringFieldUpdateOperationsInput | string | null
     s3_url?: NullableStringFieldUpdateOperationsInput | string | null
@@ -19560,6 +19896,7 @@ export namespace Prisma {
     title: string
     description?: string | null
     contractType: $Enums.ContractType
+    chain?: $Enums.Chain
     code?: string | null
     codeHash?: string | null
     s3_url?: string | null
@@ -19608,6 +19945,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     contractType?: EnumContractTypeFieldUpdateOperationsInput | $Enums.ContractType
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     code?: NullableStringFieldUpdateOperationsInput | string | null
     codeHash?: NullableStringFieldUpdateOperationsInput | string | null
     s3_url?: NullableStringFieldUpdateOperationsInput | string | null
@@ -19634,6 +19972,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     contractType?: EnumContractTypeFieldUpdateOperationsInput | $Enums.ContractType
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     code?: NullableStringFieldUpdateOperationsInput | string | null
     codeHash?: NullableStringFieldUpdateOperationsInput | string | null
     s3_url?: NullableStringFieldUpdateOperationsInput | string | null
@@ -19660,6 +19999,7 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     contractType?: EnumContractTypeFieldUpdateOperationsInput | $Enums.ContractType
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     code?: NullableStringFieldUpdateOperationsInput | string | null
     codeHash?: NullableStringFieldUpdateOperationsInput | string | null
     s3_url?: NullableStringFieldUpdateOperationsInput | string | null
@@ -19757,14 +20097,17 @@ export namespace Prisma {
 
   export type DeploymentCreateManyContractInput = {
     id?: string
+    chain?: $Enums.Chain
     network: string
     deployedAt?: Date | string
     txSignature?: string | null
     status: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type BuildJobCreateManyContractInput = {
     id?: string
+    chain?: $Enums.Chain
     jobId: string
     status: $Enums.BuildStatus
     podName?: string | null
@@ -19802,30 +20145,37 @@ export namespace Prisma {
 
   export type DeploymentUpdateWithoutContractInput = {
     id?: StringFieldUpdateOperationsInput | string
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     network?: StringFieldUpdateOperationsInput | string
     deployedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     txSignature?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type DeploymentUncheckedUpdateWithoutContractInput = {
     id?: StringFieldUpdateOperationsInput | string
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     network?: StringFieldUpdateOperationsInput | string
     deployedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     txSignature?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type DeploymentUncheckedUpdateManyWithoutContractInput = {
     id?: StringFieldUpdateOperationsInput | string
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     network?: StringFieldUpdateOperationsInput | string
     deployedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     txSignature?: NullableStringFieldUpdateOperationsInput | string | null
     status?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type BuildJobUpdateWithoutContractInput = {
     id?: StringFieldUpdateOperationsInput | string
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     jobId?: StringFieldUpdateOperationsInput | string
     status?: EnumBuildStatusFieldUpdateOperationsInput | $Enums.BuildStatus
     podName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -19843,6 +20193,7 @@ export namespace Prisma {
 
   export type BuildJobUncheckedUpdateWithoutContractInput = {
     id?: StringFieldUpdateOperationsInput | string
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     jobId?: StringFieldUpdateOperationsInput | string
     status?: EnumBuildStatusFieldUpdateOperationsInput | $Enums.BuildStatus
     podName?: NullableStringFieldUpdateOperationsInput | string | null
@@ -19860,6 +20211,7 @@ export namespace Prisma {
 
   export type BuildJobUncheckedUpdateManyWithoutContractInput = {
     id?: StringFieldUpdateOperationsInput | string
+    chain?: EnumChainFieldUpdateOperationsInput | $Enums.Chain
     jobId?: StringFieldUpdateOperationsInput | string
     status?: EnumBuildStatusFieldUpdateOperationsInput | $Enums.BuildStatus
     podName?: NullableStringFieldUpdateOperationsInput | string | null

@@ -3,20 +3,19 @@
  * © 2026 ayushshrivastv
  */
 
-import axios from 'axios';
 import { FileContent } from '../types/github_worker_queue_types';
 import { Octokit, RestEndpointMethodTypes } from '@octokit/rest';
-import env from '../configs/config.env';
 import JSZip from 'jszip';
 import { prisma } from '@lighthouse/database';
+import ObjectStore from '../class/object_store';
 
 export default class GithubServices {
+    constructor(private readonly objectStore: ObjectStore) {}
+
     public async fetch_codebase(contract_id: string): Promise<FileContent[] | null> {
         try {
-            const { data } = await axios.get(
-                `${env.SERVER_CLOUDFRONT_DOMAIN}/${contract_id}/resource`,
-            );
-            return data;
+            const files = await this.objectStore.get_resource_files(contract_id);
+            return files as FileContent[];
         } catch (error) {
             console.error(error);
             throw new Error('Failed to fetch code');
