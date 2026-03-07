@@ -1,12 +1,32 @@
 # BlackIn Backend
 
-BlackIn: Agentic Smart Contract Auditor is an agentic AI powered code editor built specifically for smart contracts on Base. It runs in the browser for the product experience, while this backend repository provides the execution engine that turns user intent into generated code, validated workflows, and deployment lifecycle operations. The goal is to remove setup friction and move developers from idea to running Base application without spending a full day wiring Solidity tooling, Foundry, workflow configuration, and deployment orchestration manually.
+## Project Description
 
-Building on Base usually requires Solidity knowledge, Foundry setup, manual Chainlink Runtime Environment configuration, hand written workflow files, and many integration steps before the first real feature is delivered. This backend is built to eliminate that sequence. When a prompt arrives, the service plans and generates project artifacts, prepares contract and frontend files, and orchestrates runtime execution through queue workers that can simulate, deploy, and activate workflows while streaming progress back to the product interface.
+BlackIn is an agentic AI powered code editor built for smart contract development on Base. It brings writing, auditing, and deploying smart contracts into a single browser based environment, designed for developers who want to ship on Base without the overhead of manual tooling and configuration.
 
-The Chainlink Runtime Environment path is implemented as a core runtime in this repository. The adapter composes CRE project files, resolves runtime dependencies, prepares WASM plugin prerequisites, performs preflight checks, and executes the workflow lifecycle for simulate, deploy, and activate. The full implementation mapping is documented in Chainlink.md and can be reviewed at https://github.com/Black-in/lighthouse-main/blob/main/Chainlink.md.
+## BlackIn - Agentic Smart Contract Auditor
 
-The product walkthrough video is available at https://www.youtube.com/watch?v=UGXNKP0y-ZM.
+BlackIn is an agentic AI powered code editor built specifically for smart contracts on Base. It runs entirely in the browser, so there is nothing to install and nothing to configure. It is similar to Cursor in interaction style, but purpose built for blockchain development with security and deployment integrated directly into the generation process.
+
+Building on Base today often requires a developer to understand Solidity deeply, set up Foundry, configure Chainlink Runtime Environment manually, write workflow files by hand, and then wire everything together before a single production meaningful contract line is ready. That setup can consume a full day or more, and each manual step increases the chance of shipping vulnerable code that manages real value. Many teams skip security review early in development or delay it until late in the cycle.
+
+BlackIn eliminates both problems at once. You open BlackIn, describe your project in plain language, and the AI takes over. It plans the application, writes Solidity smart contracts, generates frontend files, and creates Chainlink Runtime Environment workflow files in one pass. While contracts are being written, BlackIn runs audit oriented checks against known vulnerability patterns so developers can review code that is already screened during generation.
+
+After initial generation, the project can be refined through chat in the same workspace by asking for function additions, logic changes, and structural updates. When the project is ready, deployment can be initiated for Base Sepolia or Base Mainnet. The deployment path runs through Chainlink Runtime Environment lifecycle stages including simulate, deploy, and activate so the workflow is not only deployed but brought to an active runtime state.
+
+The final outcome is one prompt producing a complete Base application package with contracts, frontend, Chainlink Runtime Environment workflow, security aware generation, and deployment readiness. Work that previously took days of setup can be reduced to minutes of guided execution.
+
+## Project Links
+
+The product walkthrough video is available at https://www.youtube.com/watch?v=UGXNKP0y-ZM. The Chainlink integration reference for this backend is documented at https://github.com/Black-in/lighthouse-main/blob/main/Chainlink.md.
+
+## How to Build and Run the Backend
+
+Install dependencies from the repository root with `pnpm install`, start local infrastructure with `docker compose up -d postgres redis`, synchronize schema with `pnpm db:push`, and then run the backend services with `pnpm --filter server dev` and `pnpm --filter socket dev`. In this setup, the API runs on port `8787` and the socket runtime runs on port `8282`. For validation and build quality, run `pnpm --filter server lint`, `pnpm --filter server run test:cre`, and `pnpm --filter server build`.
+
+## Backend Project Structure
+
+The backend implementation is centered in `apps/server`, where API handlers, generation orchestration, Chainlink runtime integration, and queue workers are implemented. Real time command transport is implemented in `apps/socket`. Persistence and schema logic are maintained in `packages/database`. Base and CRE specific runtime logic is located under `apps/server/src/chains/base`, queue lifecycle execution is defined under `apps/server/src/queue`, and startup service composition is defined in `apps/server/src/services`.
 
 ## Project Architecture Diagram
 
@@ -29,11 +49,3 @@ flowchart LR
     WS --> REDIS
     REDIS --> FE
 ```
-
-The way BlackIn works is straightforward for the user and rigorous in execution. A user describes a project in natural language, the backend drives generation of Solidity smart contracts and application files, and the system prepares Chainlink Runtime Environment workflow artifacts in the same pass. As iterations continue through chat, this backend keeps state, applies updates, and routes deploy commands to Base Sepolia or Base Mainnet through controlled execution paths so each run has traceable metadata and consistent operational behavior.
-
-To build this project locally, run `pnpm install` in the repository root, start required infrastructure with `docker compose up -d postgres redis`, apply database schema with `pnpm db:push`, and then start backend services with `pnpm --filter server dev` and `pnpm --filter socket dev`. In this setup, the API runs on port `8787` and the socket runtime runs on port `8282`. For validation and release quality, run `pnpm --filter server lint`, `pnpm --filter server run test:cre`, and `pnpm --filter server build`.
-
-The repository structure is organized so execution concerns stay clear and maintainable. The `apps/server` directory contains API handlers, generation orchestration, queue workers, and chain runtime integration. The `apps/socket` directory contains websocket command handling and terminal event transport. The `packages/database` directory contains Prisma schema and persistence contracts, while shared workspace packages provide common types and runtime interfaces used across services. Within the server, Base and CRE runtime logic lives under `apps/server/src/chains/base`, queue orchestration is centered in `apps/server/src/queue`, and startup wiring is defined in `apps/server/src/services`.
-
-The result is that one prompt can produce a complete Base application lifecycle through this backend, including generated contracts, generated application code, Chainlink workflow integration, and deployment execution paths that are ready for simulation and production deployment operations.
