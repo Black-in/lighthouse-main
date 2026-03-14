@@ -19,11 +19,17 @@ For a detailed technical understanding of Chainlink Components, please refer to 
   <img width="706" height="702" alt="Watch the demo" src="https://github.com/user-attachments/assets/1dd614b6-4cd5-46e1-8880-4c9851585568" />
 </a>
 
-## BlackIn 
+## The Problem
 
-BlackIn is an agentic AI powered code editor built specifically for smart contracts on Base. It runs entirely in the browser, so there is nothing to install and nothing to configure. Think of it like Cursor, but purpose built for blockchain development with security and deployment built right into the generation process.
+Building on Base today requires a developer to know Solidity, set up Foundry, configure Chainlink Runtime Environment manually, write workflow files by hand, and then wire everything together before a single line of contract code is even written. That entire setup can take a full day or more, and at every step there is a risk of shipping vulnerable smart contract code that handles real money. Most developers either skip the audit step entirely or do it too late in the process. BlackIn eliminates both problems at once.
 
-One prompt gives you a complete Base application. Contracts, frontend, Chainlink Runtime Environment workflow, security audit, and a live deployment. What used to take days of setup now takes minutes.
+## What BlackIn Does
+
+BlackIn runs entirely in the browser. There is nothing to install and nothing to configure. You describe your project in plain language and the AI takes over. It plans the application, writes the Solidity smart contracts, generates the frontend, and creates all the Chainlink Runtime Environment workflow files in one pass. As the contracts are being written, BlackIn audits them against known security vulnerabilities in real time, so the code you see in the editor has already been reviewed before you read it.
+
+The generated project is not just a smart contract. It is a complete Chainlink Runtime Environment ready workspace with the workflow file, the project file, the secrets file, and the main workflow logic that imports directly from the Chainlink Runtime Environment SDK. One prompt gives you a complete Base application with contracts, frontend, Chainlink Runtime Environment workflow, security audit, and a live deployment. What used to take days of setup now takes minutes.
+
+Once the code is generated you can refine it through a chat interface, just like Cursor, asking it to add functions, fix logic, or change structure directly. When you are ready, you connect your wallet and deploy to Base Sepolia or Base Mainnet with a single click. The deployment runs through Chainlink Runtime Environment in the backend, executing simulate, deploy, and activate in strict order so your project is not just deployed but live and running on Chainlink infrastructure from day one.
 
 ## Project Architecture Diagram
 
