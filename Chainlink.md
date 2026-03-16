@@ -2,7 +2,7 @@
 
 ### Summary 
 
-BlackIn is an AI-powered smart contract IDE that runs on Chainlink Runtime Environment — and generates CRE workflows for every project you build inside it. One prompt gives developers a complete workspace: Solidity contracts, frontend, and a ready-to-run CRE workflow. BlackIn uses CRE to power itself, and produces CRE for others.
+BlackIn is an AI-powered smart contract IDE that runs on Chainlink Runtime Environment and generates CRE workflows for every project you build inside it. One prompt gives developers a complete workspace: Solidity contracts, frontend, and a ready to run CRE workflow. BlackIn uses CRE to power itself, and produces CRE for others.
 
 So let me just walk you through how this whole thing actually works, because looking at it from the outside it can seem like a lot of moving pieces. But once you trace through it from the moment a user clicks something on the screen to when a workflow is actually live on chain, it all starts to make sense.
 
