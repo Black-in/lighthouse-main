@@ -1,5 +1,9 @@
 # How We Built the Chainlink Integration in BlackIn
 
+### Summary 
+
+BlackIn is an AI-powered smart contract IDE that runs on Chainlink Runtime Environment — and generates CRE workflows for every project you build inside it. One prompt gives developers a complete workspace: Solidity contracts, frontend, and a ready-to-run CRE workflow. BlackIn uses CRE to power itself, and produces CRE for others.
+
 So let me just walk you through how this whole thing actually works, because looking at it from the outside it can seem like a lot of moving pieces. But once you trace through it from the moment a user clicks something on the screen to when a workflow is actually live on chain, it all starts to make sense.
 
 It starts from the backend. The very first thing we had to figure out was how to treat Base Sepolia and Base Mainnet as real targets that Chainlink's CRE tooling would understand. So inside the adapter, there is a block that reads environment variables for the CLI path, the API key, the private key, the runner mode, and the chain selector. All of that normalization happens at [cre_adapter.ts L157-L221](https://github.com/Black-in/lighthouse-main/blob/aa832709ca3e80b0a2ac063167a2e9e43bf0bbc8/apps/server/src/chains/base/cre_adapter.ts#L157-L221). The reason we did it this way is because every single operation that comes after it, whether that is simulation or full deployment, needs to speak the same language. Without that normalized setup, you would end up patching environment values in five different places and things would start breaking in unpredictable ways.
